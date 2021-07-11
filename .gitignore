@@ -25,7 +25,9 @@ buildSrc/build
 /framework-bom/build
 /integration-tests/build
 /src/asciidoc/build
-#target/
+target/
+# **两个星号符号匹配任何文件或零个或多个目录
+!spring-aop/**/target
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath
