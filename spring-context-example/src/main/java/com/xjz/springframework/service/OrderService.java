@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 /**
  * @author Williami
  * @description
- * @date 2021/7/10
+ * @date 2021/7/15
  */
-@Component("xxx")
-public class UserService {
+@Component
+public class OrderService {
 }

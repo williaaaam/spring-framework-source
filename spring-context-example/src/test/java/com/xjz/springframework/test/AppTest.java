@@ -17,6 +17,8 @@ public class AppTest {
 	public void context() {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
 		UserService bean = applicationContext.getBean(UserService.class);
-		Assert.assertNotNull(bean);
+		// com.xjz.springframework.service.UserService@714e0831
+		System.out.println(bean);
+		//Assert.assertNotNull(bean);
 	}
 }
