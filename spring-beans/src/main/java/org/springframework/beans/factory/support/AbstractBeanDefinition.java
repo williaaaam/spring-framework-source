@@ -39,6 +39,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * 它根据 BeanDefinition 中定义的接口提供了相应的属性，并实现了 BeanDefinition 中定义的一部分方法。BeanDefinition 中原本只是定义了一系列的 get/set 方法，
+ * 并没有提供对应的属性，在 AbstractBeanDefinition 中将所有的属性定义出来了。
  * Base class for concrete, full-fledged {@link BeanDefinition} classes,
  * factoring out common properties of {@link GenericBeanDefinition},
  * {@link RootBeanDefinition}, and {@link ChildBeanDefinition}.
