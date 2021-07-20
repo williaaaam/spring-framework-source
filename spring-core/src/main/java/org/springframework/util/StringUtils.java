@@ -537,6 +537,7 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * 将str首字母小写
 	 * Uncapitalize a {@code String}, changing the first letter to
 	 * lower case as per {@link Character#toLowerCase(char)}.
 	 * No other letters are changed.
@@ -555,9 +556,11 @@ public abstract class StringUtils {
 		char baseChar = str.charAt(0);
 		char updatedChar;
 		if (capitalize) {
+			// 首字母大写
 			updatedChar = Character.toUpperCase(baseChar);
 		}
 		else {
+			// 首字母小写
 			updatedChar = Character.toLowerCase(baseChar);
 		}
 		if (baseChar == updatedChar) {

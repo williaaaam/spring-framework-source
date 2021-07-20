@@ -68,6 +68,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public static final String SCOPE_DEFAULT = "";
 
 	/**
+	 * 默认情况不采用自动注入
 	 * Constant that indicates no external autowiring at all.
 	 * @see #setAutowireMode
 	 */
@@ -151,6 +152,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Nullable
 	private Boolean lazyInit;
 
+	/**
+	 * 默认情况不采用自动注入
+	 */
 	private int autowireMode = AUTOWIRE_NO;
 
 	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
@@ -158,8 +162,14 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Nullable
 	private String[] dependsOn;
 
+	/**
+	 * 默认情况作为自动注入的候选bean
+	 */
 	private boolean autowireCandidate = true;
 
+	/**
+	 * 默认不作为优先使用的bean
+	 */
 	private boolean primary = false;
 
 	private final Map<String, AutowireCandidateQualifier> qualifiers = new LinkedHashMap<>();
@@ -202,6 +212,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Nullable
 	private String description;
 
+	/**
+	 * 例如AppConfig中定义的Bean的建模对象BeanDefinition对应的resource#getDescription= defined in com.xjz.springframework.config.AppConfig
+	 */
 	@Nullable
 	private Resource resource;
 

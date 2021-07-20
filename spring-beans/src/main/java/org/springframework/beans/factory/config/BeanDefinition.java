@@ -97,12 +97,14 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	void setParentName(@Nullable String parentName);
 
 	/**
+	 * 获取父BeanDefinition,主要用于合并
 	 * Return the name of the parent definition of this bean definition, if any.
 	 */
 	@Nullable
 	String getParentName();
 
 	/**
+	 * Bean的className
 	 * 对应XML中<bean class="">配置
 	 * Specify the bean class name of this bean definition.
 	 * <p>The class name can be modified during bean factory post-processing,
@@ -131,6 +133,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	String getBeanClassName();
 
 	/**
+	 * Bean作用域
 	 * Override the target scope of this bean, specifying a new scope name.
 	 *
 	 * @see #SCOPE_SINGLETON
@@ -146,6 +149,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	String getScope();
 
 	/**
+	 * 是否懒加载
 	 * 对应<bean lazy-init="" ></bean>
 	 * Set whether this bean should be lazily initialized.
 	 * <p>If {@code false}, the bean will get instantiated on startup by bean
@@ -161,6 +165,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	boolean isLazyInit();
 
 	/**
+	 * 是否需要等待指定的bean创建完之后再创建
 	 * <bean depends-on="" ></bean>
 	 * Set the names of the beans that this bean depends on being initialized.
 	 * The bean factory will guarantee that these beans get initialized first.
@@ -184,6 +189,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	void setAutowireCandidate(boolean autowireCandidate);
 
 	/**
+	 * 是否作为自动注入的候选对象
 	 * 配置/获取 Bean 是否是自动装配
 	 * Return whether this bean is a candidate for getting autowired into some other bean.
 	 */
@@ -198,12 +204,14 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	void setPrimary(boolean primary);
 
 	/**
+	 * 是否作为主选的bean
 	 * <bean primary="">
 	 * Return whether this bean is a primary autowire candidate.
 	 */
 	boolean isPrimary();
 
 	/**
+	 * 创建这个bean的类的名称
 	 * <bean factory-bean="">
 	 * Specify the factory bean to use, if any.
 	 * This the name of the bean to call the specified factory method on.
@@ -220,6 +228,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	String getFactoryBeanName();
 
 	/**
+	 * 创建这个bean的方法的名称
 	 * Specify a factory method, if any. This method will be invoked with
 	 * constructor arguments, or with no arguments if none are specified.
 	 * The method will be invoked on the specified factory bean, if any,
@@ -237,7 +246,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	String getFactoryMethodName();
 
 	/**
-	 *  返回该 Bean 构造方法的参数值
+	 * 构造器参数值
+	 * 返回该 Bean 构造方法的参数值
 	 * Return the constructor argument values for this bean.
 	 * <p>The returned instance can be modified during bean factory post-processing.
 	 *
@@ -256,6 +266,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	}
 
 	/**
+	 * setter方法的参数
 	 * 这个是获取普通属性的集合
 	 * Return the property values to be applied to a new instance of the bean.
 	 * <p>The returned instance can be modified during bean factory post-processing.
@@ -274,6 +285,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	}
 
 	/**
+	 * 生命周期回调方法，在bean完成属性注入后调用
 	 * 配置Bean初始化方法
 	 * Set the name of the initializer method.
 	 *
@@ -282,6 +294,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	void setInitMethodName(@Nullable String initMethodName);
 
 	/**
+	 * 生命周期回调方法，在bean被销毁时调用
 	 * Return the name of the initializer method.
 	 *
 	 * @since 5.1
@@ -310,9 +323,9 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * provides the frameworks as well as tools an indication of
 	 * the role and importance of a particular {@code BeanDefinition}.
 	 *
-	 * @see #ROLE_APPLICATION
-	 * @see #ROLE_SUPPORT
-	 * @see #ROLE_INFRASTRUCTURE
+	 * @see #ROLE_APPLICATION 用户定义的
+	 * @see #ROLE_SUPPORT 某些复杂的配置
+	 * @see #ROLE_INFRASTRUCTURE 完全内部使用
 	 * @since 5.1
 	 */
 	void setRole(int role);
@@ -375,6 +388,11 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	boolean isPrototype();
 
 	/**
+	 * 当我们设置某个BeanDefinition的abstract=true时，一般都是要将其当作BeanDefinition的模板使用
+	 * <p>
+	 * 如果一个BeanDefinition被当作父BeanDefinition使用，并且没有指定其class属性。那么必须要设置其abstract为true
+	 * <p>
+	 * 跟合并beanDefinition相关，如果是abstract，说明会被作为一个父beanDefinition，不用提供class属性
 	 * 不可实例化的
 	 * Return whether this bean is "abstract", that is, not meant to be instantiated.
 	 */

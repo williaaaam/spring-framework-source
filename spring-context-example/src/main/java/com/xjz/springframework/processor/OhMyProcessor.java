@@ -16,7 +16,7 @@ import java.util.Arrays;
  * @description
  * @date 2021/7/15
  */
-@Component
+@Component // ScannedGenericBeanDefinition
 public class OhMyProcessor implements BeanFactoryPostProcessor {
 
 	@Override
@@ -26,6 +26,8 @@ public class OhMyProcessor implements BeanFactoryPostProcessor {
 		/**
 		 * 实际上生成了UserService Bean,启动时如果也扫描了UserService，则报错：expected single matching bean but found 2: orderService,userService
 		 */
-		orderServiceBeanDefinition.setBeanClass(UserService.class);
+		//orderServiceBeanDefinition.setBeanClass(UserService.class);
+		System.out.println("invoke OhMyProcessor processor");
 	}
+
 }

@@ -1868,6 +1868,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		String initMethodName = mbd.getInitMethodName();
 		Assert.state(initMethodName != null, "No init method set");
+		// 反射获取方法
 		Method initMethod = (mbd.isNonPublicAccessAllowed() ?
 				BeanUtils.findMethod(bean.getClass(), initMethodName) :
 				ClassUtils.getMethodIfAvailable(bean.getClass(), initMethodName));
@@ -1909,6 +1910,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		else {
 			try {
 				ReflectionUtils.makeAccessible(methodToInvoke);
+				// 反射执行方法
 				methodToInvoke.invoke(bean);
 			}
 			catch (InvocationTargetException ex) {

@@ -554,6 +554,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return resolvedBeanNames;
 	}
 
+	/**
+	 * 触发BeanDefinition合并
+	 * @param type
+	 * @param includeNonSingletons
+	 * @param allowEagerInit
+	 * @return
+	 */
 	private String[] doGetBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
 		List<String> result = new ArrayList<>();
 
@@ -919,9 +926,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// Trigger initialization of all non-lazy singleton beans...
 		for (String beanName : beanNames) {
+			// BeanDefinition合并
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			// 合并之后为什么要合并? :Spring需要用到bd的属性，要保证获取到的bd的属性是正确的
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 				if (isFactoryBean(beanName)) {
+					// 触发BeanDefinition合并
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
 					if (bean instanceof FactoryBean) {
 						FactoryBean<?> factory = (FactoryBean<?>) bean;
@@ -988,9 +998,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						"Validation of bean definition failed", ex);
 			}
 		}
-
+		// 从BeanDefinitionMap中查beanName对应的bean
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
 		if (existingDefinition != null) {
+			// bean已经存在
 			if (!isAllowBeanDefinitionOverriding()) {
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
@@ -1234,6 +1245,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return resolveNamedBean(candidateNames[0], requiredType, args);
 		}
 		else if (candidateNames.length > 1) {
+			// 保存beanName和Bean实例对象的映射关系
 			Map<String, Object> candidates = CollectionUtils.newLinkedHashMap(candidateNames.length);
 			for (String beanName : candidateNames) {
 				if (containsSingleton(beanName) && args == null) {
@@ -1258,6 +1270,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 				return new NamedBeanHolder<>(candidateName, (T) beanInstance);
 			}
+			// candidateName == null时会走到这里，表示Spring容器无法判断使用哪个候选Bean，报错
 			if (!nonUniqueAsNull) {
 				throw new NoUniqueBeanDefinitionException(requiredType, candidates.keySet());
 			}
