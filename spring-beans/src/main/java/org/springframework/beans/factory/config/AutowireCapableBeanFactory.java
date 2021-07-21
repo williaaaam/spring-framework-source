@@ -62,6 +62,8 @@ import org.springframework.lang.Nullable;
 public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
+	 * 目前Spring默认的注入模型，也可以说默认情况下Spring是关闭自动注入，必须要我们通过setter方法或者构造函数完成依赖注入，并且Spring也不推荐修改默认配置。
+	 * 自动注入模型
 	 * Constant that indicates no externally defined autowiring. Note that
 	 * BeanFactoryAware etc and annotation-driven injection will still be applied.
 	 * @see #createBean
@@ -71,6 +73,16 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	int AUTOWIRE_NO = 0;
 
 	/**
+	 * 自动注入模型
+	 * Spring自动注入的条件：1. 提供setter方法 2. 如果需要注入的属性为xxx,那么setter方法命名必须是setXxx,也就是说，命名必须规范
+	 * //记得需要将配置信息修改为：<bean id="auto" class="com.dmz.official.service.AutoService" 		   autowire="byName"/>
+	 *
+	 * public class AutoService {
+	 * 	DmzService dmzService;
+	 * 	 * 	setXXX,Spring会根据XXX到容器中找对应名称的bean,找到了就完成注入
+	 * 	public void setDmzService(DmzService dmzServ ice){* 		System.out.println("注入dmzServ i ce"+dmzService);* 		service = dmzService;
+	 *    }
+	 *
 	 * Constant that indicates autowiring bean properties by name
 	 * (applying to all bean property setters).
 	 * @see #createBean
@@ -80,6 +92,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	int AUTOWIRE_BY_NAME = 1;
 
 	/**
+	 * 	  自动注入模型
 	 * Constant that indicates autowiring bean properties by type
 	 * (applying to all bean property setters).
 	 * @see #createBean
@@ -89,6 +102,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	int AUTOWIRE_BY_TYPE = 2;
 
 	/**
+	 * 	自动注入模型
 	 * Constant that indicates autowiring the greediest constructor that
 	 * can be satisfied (involves resolving the appropriate constructor).
 	 * @see #createBean

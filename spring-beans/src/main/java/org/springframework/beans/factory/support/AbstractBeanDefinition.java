@@ -28,6 +28,7 @@ import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.DescriptiveResource;
@@ -174,6 +175,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private final Map<String, AutowireCandidateQualifier> qualifiers = new LinkedHashMap<>();
 
+	/**
+	 * @see org.springframework.context.support.GenericApplicationContext#registerBean(Class, Supplier, BeanDefinitionCustomizer...)  中的Supplier
+	 */
 	@Nullable
 	private Supplier<?> instanceSupplier;
 

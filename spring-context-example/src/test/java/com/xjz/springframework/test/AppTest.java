@@ -4,6 +4,9 @@ import com.xjz.springframework.config.AppConfig;
 import com.xjz.springframework.domain.Foo;
 import com.xjz.springframework.domain.Person;
 import com.xjz.springframework.domain.User;
+import com.xjz.springframework.service.OhMyService;
+import com.xjz.springframework.service.OhMyService2;
+import com.xjz.springframework.service.OrderService;
 import com.xjz.springframework.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -191,4 +194,68 @@ public class AppTest {
 		System.out.println();
 
 	}
+
+
+	@DisplayName("验证不同Bean创建方式之构造器")
+	@Test
+	public void noArgConstructor() {
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+		OrderService orderService = applicationContext.getBean(OrderService.class);
+		System.out.println(orderService);
+	}
+
+
+	@DisplayName("测试依赖注入")
+	@Test
+	public void di(){
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+		applicationContext.getBean(UserService.class);
+		System.out.println();
+	}
+
+
+	@DisplayName("单例对象依赖原型对象")
+	@Test
+	public void singletonDependsOnPrototype(){
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+		/**
+		 * 以下三个bean均是同一个对象
+		 */
+		System.out.println(applicationContext.getBean(OhMyService.class));
+		System.out.println(applicationContext.getBean(OhMyService.class));
+		System.out.println(applicationContext.getBean(OhMyService.class));
+
+		/**
+		 * 以下三个Bean OhMyService2是不同的对象
+		 */
+		System.out.println(applicationContext.getBean(OhMyService2.class));
+		System.out.println(applicationContext.getBean(OhMyService2.class));
+		System.out.println(applicationContext.getBean(OhMyService2.class));
+
+
+		/**
+		 * 开始执行单例Bean OhMyService的方法
+		 * 可以看出OhMyService依赖的对象是同一个
+		 */
+		OhMyService bean = applicationContext.getBean(OhMyService.class);
+		bean.test(1); // 1
+		bean.test(2); // 3
+		bean.test(3); // 6
+
+		System.out.println("*************************************************");
+
+		OhMyService bean2 = applicationContext.getBean(OhMyService.class);
+		bean2.test(1); // 7
+		bean2.test(2); // 9
+		bean2.test(3); // 12
+
+	}
+
+
+	@DisplayName("Spring对象协作的几种方式")
+	@Test
+	public void beanCollaborator(){
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+	}
+
 }

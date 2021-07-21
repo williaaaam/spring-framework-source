@@ -22,6 +22,9 @@ import java.util.function.Supplier;
 /**
  * @see org.springframework.context.annotation.AnnotatedBeanDefinitionReader#doRegisterBean(Class, String, Class[], Supplier, BeanDefinitionCustomizer[])  方法中使用AnnotatedGenericBeanDefinition对象来承载beanClass
  * @see org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition
+ *
+ * <p>
+ * @Configuration也是通过无参构造器创建的Bean实例
  */
 @Configuration
 public class AppConfig {
