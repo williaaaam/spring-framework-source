@@ -241,6 +241,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private ResourcePatternResolver resourcePatternResolver;
 
 	/**
+	 * 这个类主要负载将启动或停止信息传播到具体的Bean当中
 	 * LifecycleProcessor for managing the lifecycle of beans within this context.
 	 */
 	@Nullable
@@ -618,6 +619,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
+				/**
+				 * Spring扩展点之BeanPostProcessor
+				 */
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
 
@@ -871,6 +875,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 *
 	 * Initialize the LifecycleProcessor.
 	 * Uses DefaultLifecycleProcessor if none defined in the context.
 	 *
@@ -878,13 +883,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void initLifecycleProcessor() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		//判断当前容器中是否有一个lifecycleProcessor的Bean或者BeanDefinition
 		if (beanFactory.containsLocalBean(LIFECYCLE_PROCESSOR_BEAN_NAME)) {
+			//如果有的话，采用这个提供的lifecycleProcessor
 			this.lifecycleProcessor =
 					beanFactory.getBean(LIFECYCLE_PROCESSOR_BEAN_NAME, LifecycleProcessor.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Using LifecycleProcessor [" + this.lifecycleProcessor + "]");
 			}
 		} else {
+			// 没有的话，自己new一个DefaultLifecycleProcessor
 			DefaultLifecycleProcessor defaultProcessor = new DefaultLifecycleProcessor();
 			defaultProcessor.setBeanFactory(beanFactory);
 			this.lifecycleProcessor = defaultProcessor;
@@ -984,6 +992,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		initLifecycleProcessor();
 
 		// Propagate refresh to lifecycle processor first.
+		/**
+		 * 获取我们上一步提供的lifecycleProcessor，然后调用其onRefresh方法
+		 */
 		getLifecycleProcessor().onRefresh();
 
 		// Publish the final event.

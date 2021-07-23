@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeansException;
 
 /**
+ * BeanFactoryPostProcessor 能让我们对容器中的扫描出来的BeanDefinition做出修改以达到扩展的目的
  * BeanFactoryPostProcessor操作的是配置元数据 configuration metadata,在Spring 容器实例化Bean之前
  * Factory hook that allows for custom modification of an application context's
  * bean definitions, adapting the bean property values of the context's underlying

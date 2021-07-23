@@ -16,7 +16,7 @@ public class OhMyService2 {
 	int i;
 
 	OhMyService2() {
-		System.out.println("OhMyService2 constructor ");
+		System.out.println("执行 OhMyService2 constructor ");
 	}
 
 	// 每次将当前对象的属性i+a然后打印

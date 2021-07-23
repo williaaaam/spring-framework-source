@@ -4,10 +4,8 @@ import com.xjz.springframework.config.AppConfig;
 import com.xjz.springframework.domain.Foo;
 import com.xjz.springframework.domain.Person;
 import com.xjz.springframework.domain.User;
-import com.xjz.springframework.service.OhMyService;
-import com.xjz.springframework.service.OhMyService2;
-import com.xjz.springframework.service.OrderService;
-import com.xjz.springframework.service.UserService;
+import com.xjz.springframework.factory.OhMyFactoryBean;
+import com.xjz.springframework.service.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.MutablePropertyValues;
@@ -207,7 +205,7 @@ public class AppTest {
 
 	@DisplayName("测试依赖注入")
 	@Test
-	public void di(){
+	public void di() {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
 		applicationContext.getBean(UserService.class);
 		System.out.println();
@@ -216,7 +214,7 @@ public class AppTest {
 
 	@DisplayName("单例对象依赖原型对象")
 	@Test
-	public void singletonDependsOnPrototype(){
+	public void singletonDependsOnPrototype() {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
 		/**
 		 * 以下三个bean均是同一个对象
@@ -254,8 +252,50 @@ public class AppTest {
 
 	@DisplayName("Spring对象协作的几种方式")
 	@Test
-	public void beanCollaborator(){
+	public void beanCollaborator() {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+		applicationContext.getBean(OhMyService.class).getOhMyService2();
+		applicationContext.getBean(OhMyService3.class).getOhMyService2();
+	}
+
+
+	/**
+	 * FactoryBean要区分与factoryBean,factoryBean指静态工厂或者实例工厂创建的Bean
+	 */
+	@DisplayName("Spring扩展点之FactoryBean")
+	@Test
+	public void FactoryBean() {
+
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+		// 获取OhMyFactoryBean生产的对象
+		System.out.println(applicationContext.getBean("ohMyFactoryBean")); // com.xjz.springframework.service.OrderService@36006f93
+		// 查询FactoryBean对象本身itself
+		System.out.println(applicationContext.getBean("&ohMyFactoryBean"));// com.xjz.springframework.factory.OhMyFactoryBean@56c8eaff
+
+		/**
+		 * 报错，OhMyFactoryBean也生产了一个Bean,此时Spring容器中有两个OrderServiceBean,Spring容器不知道该取哪一个
+		 * 解决办法：在Component注解上使用@Primary注解
+		 */
+		System.out.println(applicationContext.getBean(OrderService.class));
+
+		// 等同于applicationContext.getBean("&ohMyFactoryBean")
+		System.out.println(applicationContext.getBean(OhMyFactoryBean.class)); // com.xjz.springframework.factory.OhMyFactoryBean@56c8eaff
+	}
+
+
+	@DisplayName("测试BeanPostProcessor")
+	@Test
+	public void BeanPostProcessor() {
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+	}
+
+
+	@DisplayName("Bean生命周期之初始化和销毁回调")
+	@Test
+	public void beanLifeCycle(){
+		AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+		annotationConfigApplicationContext.start();
+		annotationConfigApplicationContext.stop();
 	}
 
 }

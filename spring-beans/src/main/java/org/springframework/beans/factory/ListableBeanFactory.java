@@ -24,6 +24,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
+ * 相对于BeanFactory，ListableBeanFactory提供了批量获取Bean的方法
  * Extension of the {@link BeanFactory} interface to be implemented by bean factories
  * that can enumerate all their bean instances, rather than attempting bean lookup
  * by name one by one as requested by clients. BeanFactory implementations that
@@ -58,6 +59,8 @@ import org.springframework.lang.Nullable;
 public interface ListableBeanFactory extends BeanFactory {
 
 	/**
+	 *    // 1.查找容器中是否包含对应名称的BeanDefinition
+	 *     // 2.忽略层级关系，只在当前容器中查找
 	 * Check if this bean factory contains a bean definition with the given name.
 	 * <p>Does not consider any hierarchy this factory may participate in,
 	 * and ignores any singleton beans that have been registered by
@@ -69,6 +72,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	boolean containsBeanDefinition(String beanName);
 
 	/**
+	 *   // 1.查找容器中包含的BeanDefinition的数量
+	 *     // 2.忽略层级关系，只在当前容器中查找
 	 * Return the number of beans defined in the factory.
 	 * <p>Does not consider any hierarchy this factory may participate in,
 	 * and ignores any singleton beans that have been registered by
@@ -78,6 +83,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	int getBeanDefinitionCount();
 
 	/**
+	 *   // 1.获取当前容器中所有的BeanDefinition的名称
+	 *     // 2.忽略层级关系，只在当前容器中查找
 	 * Return the names of all beans defined in this factory.
 	 * <p>Does not consider any hierarchy this factory may participate in,
 	 * and ignores any singleton beans that have been registered by
@@ -248,6 +255,14 @@ public interface ListableBeanFactory extends BeanFactory {
 	String[] getBeanNamesForType(@Nullable Class<?> type, boolean includeNonSingletons, boolean allowEagerInit);
 
 	/**
+	 *   // 获取指定类型的Bean,返回一个map,key为bean的名称，value为对应的Bean
+	 *     // includeNonSingletons：是否能包含非单例的Bean
+	 *     // allowEagerInit：是否允许对”懒加载"的Bean进行实例化,这里主要针对FactoryBean，因为FactoryBean
+	 *     // 默认是懒加载的，为了推断它的类型可能会进行初始化。
+	 * ————————————————
+	 * 版权声明：本文为CSDN博主「程序员DMZ」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+	 * 原文链接：https://blog.csdn.net/qq_41907991/article/details/105197581
+	 *
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
 	 * {@code getObjectType} in the case of FactoryBeans.

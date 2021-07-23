@@ -1,5 +1,6 @@
 package com.xjz.springframework.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,21 @@ import org.springframework.stereotype.Component;
 public class OhMyService3 {
 
 	{
-		System.out.println("invoke OhMyService3 构造器");
+		//System.out.println("invoke OhMyService3 构造器");
 	}
+
+	@Autowired
+	OhMyService2 ohMyService2;
+
+	@Autowired
+	OrderService orderService;
+
+	public void getOhMyService2(){
+		System.out.println("**********************************************"+ohMyService2);
+		System.out.println("**********************************************"+orderService);
+	}
+
+
+
 
 }

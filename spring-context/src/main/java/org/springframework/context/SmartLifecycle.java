@@ -17,6 +17,7 @@
 package org.springframework.context;
 
 /**
+ * 一个实现SmartLifecycle的对象，它的getPhase()方法返回Integer.MIN_VALUE将是第一个执行start方法的Bean和最后一个执行Stop方法的Bean。
  * An extension of the {@link Lifecycle} interface for those objects that require
  * to be started upon {@code ApplicationContext} refresh and/or shutdown in a
  * particular order.
@@ -80,6 +81,7 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 
 
 	/**
+	 * 不需要显示的调用容器的start方法及stop方法也可以执行Bean的start方法跟stop方法
 	 * Returns {@code true} if this {@code Lifecycle} component should get
 	 * started automatically by the container at the time that the containing
 	 * {@link ApplicationContext} gets refreshed.
@@ -97,6 +99,7 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	}
 
 	/**
+	 * 容器停止时调用的方法
 	 * Indicates that a Lifecycle component must stop if it is currently running.
 	 * <p>The provided callback is used by the {@link LifecycleProcessor} to support
 	 * an ordered, and potentially concurrent, shutdown of all components having a
@@ -119,6 +122,7 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	}
 
 	/**
+	 * 优先级，默认最低
 	 * Return the phase that this lifecycle object is supposed to run in.
 	 * <p>The default implementation returns {@link #DEFAULT_PHASE} in order to
 	 * let {@code stop()} callbacks execute after regular {@code Lifecycle}

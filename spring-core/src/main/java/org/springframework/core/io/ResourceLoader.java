@@ -20,6 +20,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
 /**
+ * 加载资源文件
  * Strategy interface for loading resources (e.g., class path or file system
  * resources). An {@link org.springframework.context.ApplicationContext}
  * is required to provide this functionality plus extended

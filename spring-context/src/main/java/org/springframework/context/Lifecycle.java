@@ -50,6 +50,7 @@ package org.springframework.context;
 public interface Lifecycle {
 
 	/**
+	 * 容器启动时
 	 * Start this component.
 	 * <p>Should not throw an exception if the component is already running.
 	 * <p>In the case of a container, this will propagate the start signal to all
@@ -59,6 +60,7 @@ public interface Lifecycle {
 	void start();
 
 	/**
+	 * 容器停止时调用
 	 * Stop this component, typically in a synchronous fashion, such that the component is
 	 * fully stopped upon return of this method. Consider implementing {@link SmartLifecycle}
 	 * and its {@code stop(Runnable)} variant when asynchronous stop behavior is necessary.
@@ -76,6 +78,7 @@ public interface Lifecycle {
 	void stop();
 
 	/**
+	 * 当前组件的运行状态
 	 * Check whether this component is currently running.
 	 * <p>In the case of a container, this will return {@code true} only if <i>all</i>
 	 * components that apply are currently running.

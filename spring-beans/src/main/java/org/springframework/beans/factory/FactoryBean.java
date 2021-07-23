@@ -76,6 +76,7 @@ public interface FactoryBean<T> {
 
 
 	/**
+	 * 返回这个FactoryBean所创建的对象，实例可以是原型或者单例
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory.
 	 * <p>As with a {@link BeanFactory}, this allows support for both the
@@ -96,6 +97,7 @@ public interface FactoryBean<T> {
 	T getObject() throws Exception;
 
 	/**
+	 * 返回这个FactoryBean所创建的对象的类型，如果我们能确认返回对象的类型的话，我们应该正常对这个方法做出实现，而不是返回null。
 	 * Return the type of object that this FactoryBean creates,
 	 * or {@code null} if not known in advance.
 	 * <p>This allows one to check for specific types of beans without

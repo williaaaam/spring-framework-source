@@ -17,17 +17,25 @@ import java.util.Arrays;
  * @date 2021/7/15
  */
 @Component // ScannedGenericBeanDefinition
-public class OhMyProcessor implements BeanFactoryPostProcessor {
+public class OhMyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		//Arrays.stream(beanFactory.getBeanDefinitionNames()).forEach(System.out::println);
-		GenericBeanDefinition orderServiceBeanDefinition = (GenericBeanDefinition) beanFactory.getBeanDefinition("orderService");
+		//GenericBeanDefinition orderServiceBeanDefinition = (GenericBeanDefinition) beanFactory.getBeanDefinition("orderService");
 		/**
 		 * 实际上生成了UserService Bean,启动时如果也扫描了UserService，则报错：expected single matching bean but found 2: orderService,userService
 		 */
 		//orderServiceBeanDefinition.setBeanClass(UserService.class);
-		System.out.println("invoke OhMyProcessor processor");
+		//System.out.println("执行 OhMyProcessor processor");
+		/**
+		 * 修改OhMyService4 BeanDefinition的初始化方法
+		 *
+		 */
+
+		BeanDefinition definition = beanFactory.getBeanDefinition("ohMyService4");
+		definition.setInitMethodName("initMethod");
+
 	}
 
 }

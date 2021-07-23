@@ -1,6 +1,7 @@
 package com.xjz.springframework.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 /**
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
  * @description
  * @date 2021/7/15
  */
+@Primary // 可以解决expected single matching bean but found 2: ohMyFactoryBean,orderService
 @Component
 public class OrderService {
 
@@ -18,10 +20,10 @@ public class OrderService {
 	@Autowired
 	BarService barService;
 
-	/*public OrderService() {
-		System.out.println("invoke OrderService Constructor");
+	public OrderService() {
+		System.out.println("执行 OrderService Constructor");
+		//System.out.println(this);
 	}
-	*/
 
 	/**
 	 * 1. 可以混用构造器注入和setter 依赖注入
@@ -32,16 +34,16 @@ public class OrderService {
 	public OrderService(BarService barService) {
 		// JavaBean实例化时进行了一次注入
 		this.barService = barService;
-		System.out.println("invoke barService Constructor");
-		System.out.println("cons " + barService);// 完成了实例化
+		//System.out.println("invoke barService Constructor");
+		//System.out.println("cons " + barService);// 完成了实例化
 	}
 
 	@Autowired
 	public void setBarService(BarService barService) {
 		this.barService = null;
-		System.out.println("setter 注入 null barService"); // setter注入时覆盖实例化时的注入
-		System.out.println("setter参数"+barService);
-		System.out.println("setter " + this.barService);
+		//System.out.println("setter 注入 null barService"); // setter注入时覆盖实例化时的注入
+		//System.out.println("setter参数"+barService);
+		//System.out.println("setter " + this.barService);
 	}
 
 

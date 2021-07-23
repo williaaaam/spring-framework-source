@@ -24,12 +24,12 @@ public class UserService {
 	 */
 	@Autowired
 	public void setOrderService(OrderService orderService) {
-		System.out.println("setter 注入 orderService");
+		//System.out.println("setter 注入 orderService");
 		this.orderService = orderService;
 	}
 
 	public UserService() {
-		System.out.println("invoke UserService constructor");
+		//System.out.println("invoke UserService constructor");
 	}
 
 }

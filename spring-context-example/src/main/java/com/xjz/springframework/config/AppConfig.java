@@ -33,7 +33,7 @@ public class AppConfig {
 	 * @return
 	 * @Bean注解的Bean 会被解析成ConfigurationClassBeanDefinition {@link org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.ConfigurationClassBeanDefinition}
 	 */
-	@Bean
+	@Bean // 把对象交给Spring容器管理
 	@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 	public Foo foo() {
 		return new Foo();

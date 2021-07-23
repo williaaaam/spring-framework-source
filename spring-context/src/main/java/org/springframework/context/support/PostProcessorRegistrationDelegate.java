@@ -310,22 +310,44 @@ final class PostProcessorRegistrationDelegate {
 		// to ensure that your proposal does not result in a breaking change:
 		// https://github.com/spring-projects/spring-framework/issues?q=PostProcessorRegistrationDelegate+is%3Aclosed+label%3A%22status%3A+declined%22
 
+		// 1.获取容器中已经注册的Bean的名称，根据BeanDefinition中获取BeanName
+		/**
+		 * 此时这些后置处理器还未被创建出来
+		 */
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		// Register BeanPostProcessorChecker that logs an info message when
 		// a bean is created during BeanPostProcessor instantiation, i.e. when
 		// a bean is not eligible for getting processed by all BeanPostProcessors.
+		// 2.通过addBeanPostProcessor方法添加的BeanPostProcessor以及已经注册到容器中的BeanPostProcessor的总数量
+		/**
+		 * 这里主要是获取容器中已经存在的BeanPostProcessor的数量再加上已经被扫描出BeanDefinition的后置处理器的数量（后置处理器还没有被创建出来）
+		 */
 		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + postProcessorNames.length;
+
+		// 3.添加一个BeanPostProcessorChecker，主要用于日志记录
 		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
 
 		// Separate between BeanPostProcessors that implement PriorityOrdered,
 		// Ordered, and the rest.
+		// 保存同时实现了BeanPostProcessor跟PriorityOrdered接口的后置处理器
 		List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
+		// 保存实现了MergedBeanDefinitionPostProcessor接口的后置处理器
 		List<BeanPostProcessor> internalPostProcessors = new ArrayList<>();
+		// 保存同时实现了BeanPostProcessor跟Ordered接口的后置处理器的名字
 		List<String> orderedPostProcessorNames = new ArrayList<>();
+		// 保存同时实现了BeanPostProcessor但没有实现任何排序接口的后置处理器的名字
 		List<String> nonOrderedPostProcessorNames = new ArrayList<>();
+
+		// 4.遍历所有的后置处理器的名字，并根据不同类型将其放入到上面申明的不同集合中
+		// 同时会将实现了PriorityOrdered接口的后置处理器创建出来
+		// 如果实现了MergedBeanDefinitionPostProcessor接口，放入到internalPostProcessors
 		for (String ppName : postProcessorNames) {
 			if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+				// 创建BeanPostProcessor
+				/**
+				 * CommonAnnotationBeanPostProcessor后置处理器实例化时，设置初始化方法注解@PostConstruct和销毁初始化方法注解@PreDestroy
+				 */
 				BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
 				priorityOrderedPostProcessors.add(pp);
 				if (pp instanceof MergedBeanDefinitionPostProcessor) {
@@ -339,22 +361,30 @@ final class PostProcessorRegistrationDelegate {
 		}
 
 		// First, register the BeanPostProcessors that implement PriorityOrdered.
+		// 5.将priorityOrderedPostProcessors集合排序
 		sortPostProcessors(priorityOrderedPostProcessors, beanFactory);
+		// 6.将priorityOrderedPostProcessors集合中的后置处理器添加到容器中
 		registerBeanPostProcessors(beanFactory, priorityOrderedPostProcessors);
 
 		// Next, register the BeanPostProcessors that implement Ordered.
 		List<BeanPostProcessor> orderedPostProcessors = new ArrayList<>(orderedPostProcessorNames.size());
 		for (String ppName : orderedPostProcessorNames) {
+			// 创建实现了Ordered接口的BeanPostProcessor
 			BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
 			orderedPostProcessors.add(pp);
 			if (pp instanceof MergedBeanDefinitionPostProcessor) {
 				internalPostProcessors.add(pp);
 			}
 		}
+
+		// 按照Ordered接口排序
 		sortPostProcessors(orderedPostProcessors, beanFactory);
 		registerBeanPostProcessors(beanFactory, orderedPostProcessors);
 
 		// Now, register all regular BeanPostProcessors.
+
+		// 7.遍历所有实现了常规后置处理器（没有实现任何排序接口）的名字，并进行创建
+		// 如果实现了MergedBeanDefinitionPostProcessor接口，放入到internalPostProcessors
 		List<BeanPostProcessor> nonOrderedPostProcessors = new ArrayList<>(nonOrderedPostProcessorNames.size());
 		for (String ppName : nonOrderedPostProcessorNames) {
 			BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
@@ -371,6 +401,7 @@ final class PostProcessorRegistrationDelegate {
 
 		// Re-register post-processor for detecting inner beans as ApplicationListeners,
 		// moving it to the end of the processor chain (for picking up proxies etc).
+		// 10.最后添加的这个后置处理器主要为了可以检测到所有的事件监听器
 		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(applicationContext));
 	}
 

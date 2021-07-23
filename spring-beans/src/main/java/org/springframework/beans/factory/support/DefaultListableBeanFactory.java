@@ -930,8 +930,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 			// 合并之后为什么要合并? :Spring需要用到bd的属性，要保证获取到的bd的属性是正确的
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+				// 判断是不是FactoryBean
 				if (isFactoryBean(beanName)) {
 					// 触发BeanDefinition合并
+					// 2.如果是一个FactoryBean那么在getBean时，添加前缀“&”，获取这个FactoryBean itself
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
 					if (bean instanceof FactoryBean) {
 						FactoryBean<?> factory = (FactoryBean<?>) bean;
@@ -942,15 +944,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 									getAccessControlContext());
 						}
 						else {
+							// 3.判断是否是一个SmartFactoryBean，并且不是懒加载的
 							isEagerInit = (factory instanceof SmartFactoryBean &&
 									((SmartFactoryBean<?>) factory).isEagerInit());
 						}
 						if (isEagerInit) {
+							// 4.如果是一个SmartFactoryBean并且不是懒加载的，那么创建这个FactoryBean创建的Bean
 							getBean(beanName);
 						}
 					}
 				}
 				else {
+					// 不是一个FactoryBean，直接创建这个Bean
 					getBean(beanName);
 				}
 			}

@@ -21,6 +21,9 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
+ * 负责配置、创建和管理Bean,IOC功能的实现主要就是依赖该接口子类实现
+ * BeanFactory接口主要提供了查找Bean，创建Bean（在getBean调用的时候也会去创建Bean）,以及针对容器中的Bean做一些判断的方法（包括是否是原型，是否是单例，容器是否包含这个名称的Bean，是否类型匹配等等）
+ * ApplicationContext具有BeanFactory所有功能
  * The root interface for accessing a Spring bean container.
  *
  * <p>This is the basic client view of a bean container;
@@ -120,6 +123,8 @@ import org.springframework.lang.Nullable;
 public interface BeanFactory {
 
 	/**
+	 *   // FactroyBean的前缀，如果getBean的时候BeanName有这个前缀，会去获取对应的FactroyBean
+	 *     // 而不是获取FactroyBean的getObject返回的Bean
 	 * Used to dereference a {@link FactoryBean} instance and distinguish it from
 	 * beans <i>created</i> by the FactoryBean. For example, if the bean named
 	 * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
