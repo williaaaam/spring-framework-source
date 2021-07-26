@@ -1,6 +1,7 @@
 package com.xjz.springframework.test;
 
 import com.xjz.springframework.config.AppConfig;
+import com.xjz.springframework.controller.OhMyController;
 import com.xjz.springframework.domain.Foo;
 import com.xjz.springframework.domain.Person;
 import com.xjz.springframework.domain.User;
@@ -292,10 +293,21 @@ public class AppTest {
 
 	@DisplayName("Bean生命周期之初始化和销毁回调")
 	@Test
-	public void beanLifeCycle(){
+	public void beanLifeCycle() {
 		AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
 		annotationConfigApplicationContext.start();
 		annotationConfigApplicationContext.stop();
+	}
+
+	@DisplayName("Spring AOP核心概念")
+	@Test
+	public void aop() {
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+		// OhMyController$$EnhancerBySpringCGLIB$$c078305d@3723
+		OhMyController ohMyController = applicationContext.getBean(OhMyController.class);
+		System.out.println("**********************************测试Spring AOP开始*********************************");
+		ohMyController.eat("23333");
+		System.out.println("**********************************测试Spring AOP结束*********************************");
 	}
 
 }

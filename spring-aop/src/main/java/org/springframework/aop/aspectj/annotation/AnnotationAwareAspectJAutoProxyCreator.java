@@ -28,6 +28,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * 完成AOP代理
  * {@link AspectJAwareAdvisorAutoProxyCreator} subclass that processes all AspectJ
  * annotation aspects in the current application context, as well as Spring Advisors.
  *

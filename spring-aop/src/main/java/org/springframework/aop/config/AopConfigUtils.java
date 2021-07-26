@@ -96,7 +96,10 @@ public abstract class AopConfigUtils {
 	@Nullable
 	public static BeanDefinition registerAspectJAnnotationAutoProxyCreatorIfNecessary(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
-
+		/**
+		 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization(Object, String) getBeanPostProcessors拿到处理AOP的BeanPostProcessor
+		 *
+		 */
 		return registerOrEscalateApcAsRequired(AnnotationAwareAspectJAutoProxyCreator.class, registry, source);
 	}
 

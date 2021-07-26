@@ -288,11 +288,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
-		// 1.获取bean名称
+		// 1.获取bean名称，校验Bean名称正确性
 		String beanName = transformedBeanName(name);
 		Object beanInstance;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		// 完成AOP代理
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {

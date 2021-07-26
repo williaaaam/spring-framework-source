@@ -570,9 +570,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
-			// 第二步：这里创建对象
+			// 第二步：这个方法里完成对象的创建，仅仅是对象
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
+		// AOP目标对象
 		Object bean = instanceWrapper.getWrappedInstance();
 		Class<?> beanType = instanceWrapper.getWrappedClass();
 		if (beanType != NullBean.class) {
@@ -616,7 +617,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		try {
 			// 第五步：属性注入
 			populateBean(beanName, mbd, instanceWrapper);
-			// 第六步：初始化
+			// 第六步：初始化，执行声明周期回调以及AOP
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -1830,7 +1831,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
-			// 第四步：完成AOP代理
+			// 第四步：完成AOP代理!!!!
 			// 标志着创建Bean阶段的结束，创建阶段包括：实例化、属性注入和初始化
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}

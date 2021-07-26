@@ -4,10 +4,7 @@ import com.xjz.springframework.domain.Foo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Supplier;
@@ -27,6 +24,8 @@ import java.util.function.Supplier;
  * @Configuration也是通过无参构造器创建的Bean实例
  */
 @Configuration
+// 开启AOP
+@EnableAspectJAutoProxy // Enable @AspectJ 等同于XML中<aop:aspectj-autoproxy /> 启动@aspectj自动代理支持的标签
 public class AppConfig {
 
 	/**
