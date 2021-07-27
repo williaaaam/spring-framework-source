@@ -1,5 +1,7 @@
 package com.xjz.springframework.test;
 
+import com.xjz.springframework.circularDependency.BarCD;
+import com.xjz.springframework.circularDependency.FooCD;
 import com.xjz.springframework.config.AppConfig;
 import com.xjz.springframework.controller.OhMyController;
 import com.xjz.springframework.domain.Foo;
@@ -9,6 +11,7 @@ import com.xjz.springframework.factory.OhMyFactoryBean;
 import com.xjz.springframework.service.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
@@ -18,6 +21,11 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 代码参考：https://segmentfault.com/a/1190000023110150
@@ -310,4 +318,65 @@ public class AppTest {
 		System.out.println("**********************************测试Spring AOP结束*********************************");
 	}
 
+
+	@DisplayName("模拟解决循环依赖")
+	@Test
+	public void circularDependency() {
+		try {
+			A bean = getBean(A.class);
+			System.out.println(bean.b);
+			System.out.println("*************************************");
+			B b = getBean(B.class);
+			System.out.println(b.a);
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+			e.printStackTrace();
+		} finally {
+		}
+	}
+
+	private final Map<String, Object> singleObjects = new HashMap<>();
+
+	private <T> T getBean(Class<T> clz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+		String beanName = clz.getSimpleName();
+		if (singleObjects.containsKey(beanName.toLowerCase())) {
+			return (T) singleObjects.get(beanName.toLowerCase());
+		}
+
+		// 第一步：实例化对象
+		T instance = clz.newInstance();
+		singleObjects.put(beanName.toLowerCase(), instance);
+
+		// 第二步：属性注入
+		Field[] declaredFields = clz.getDeclaredFields();
+		for (Field field : declaredFields) {
+			field.setAccessible(true);
+			Class<?> fieldClz = field.getType();
+			Object bean = getBean(fieldClz);
+			// 属性注入
+			field.set(instance, bean);
+		}
+
+		// 第三步：返回完整的Bean
+		return instance;
+	}
+
+	@DisplayName("循环依赖")
+	@Test
+	public void circularDependencyV2() {
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+		System.out.println();
+		System.out.println("*******************************测试循环依赖*******************************");
+
+		/*BarCD bean = applicationContext.getBean(BarCD.class);
+		System.out.println();*/
+	}
+
+}
+
+class A {
+	B b;
+}
+
+class B {
+	A a;
 }
