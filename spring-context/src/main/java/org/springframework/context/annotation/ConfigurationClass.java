@@ -210,12 +210,17 @@ final class ConfigurationClass {
 	}
 
 	void validate(ProblemReporter problemReporter) {
+		/**
+		 * @Configuration proxyBeanMethods=true,
+		 */
 		// A configuration class may not be final (CGLIB limitation) unless it declares proxyBeanMethods=false
 		Map<String, Object> attributes = this.metadata.getAnnotationAttributes(Configuration.class.getName());
 		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods")) {
+			// 如果允许@Bean注解的方法Bean代理 && 配置类是final的，则这里会报错
 			if (this.metadata.isFinal()) {
 				problemReporter.error(new FinalConfigurationProblem());
 			}
+			// 获取@Bean注解的方法
 			for (BeanMethod beanMethod : this.beanMethods) {
 				beanMethod.validate(problemReporter);
 			}

@@ -366,7 +366,11 @@ public class AppTest {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
 		System.out.println();
 		System.out.println("*******************************测试循环依赖*******************************");
-
+		Foo bean = applicationContext.getBean(Foo.class);
+		System.out.println(applicationContext.getBean(Foo.class));
+		System.out.println(applicationContext.getBean(Foo.class));
+		System.out.println(applicationContext.getBean(Foo.class));
+		System.out.println(applicationContext.getBean(Foo.class));
 		/*BarCD bean = applicationContext.getBean(BarCD.class);
 		System.out.println();*/
 	}

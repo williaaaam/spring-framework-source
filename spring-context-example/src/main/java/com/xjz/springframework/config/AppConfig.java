@@ -12,7 +12,7 @@ import java.util.function.Supplier;
  * @description
  * @date 2021/7/10
  */
-@ComponentScan("com.xjz.springframework.circularDependency")
+@ComponentScan("com.xjz.springframework.circularDependency") // <context:component-scan/> 或者 @ComponentScan 都能处理@Configuration 注解的类。
 // @Configuration注解的Bean会被解析成AnnotatedGenericBeanDefinition
 /**
  * @see org.springframework.context.annotation.AnnotatedBeanDefinitionReader#doRegisterBean(Class, String, Class[], Supplier, BeanDefinitionCustomizer[])  方法中使用AnnotatedGenericBeanDefinition对象来承载beanClass
@@ -21,18 +21,18 @@ import java.util.function.Supplier;
  * <p>
  * @Configuration也是通过无参构造器创建的Bean实例
  */
-@Configuration
+@Configuration(proxyBeanMethods = true) // 注解把@Bean注解生成的类交给Spring容器管理
 // 开启AOP
 @EnableAspectJAutoProxy // Enable @AspectJ 等同于XML中<aop:aspectj-autoproxy /> 启动@aspectj自动代理支持的标签
-public class AppConfig {
+public final class AppConfig {
 
 	/**
 	 * @return
 	 * @Bean注解的Bean 会被解析成ConfigurationClassBeanDefinition {@link org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.ConfigurationClassBeanDefinition}
 	 */
-	//@Bean // 把对象交给Spring容器管理
+	@Bean // 把对象交给Spring容器管理
 	@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-	public Foo foo() {
+	private static Foo foo() {
 		return new Foo();
 	}
 
