@@ -3,6 +3,9 @@ package com.xjz.springframework.test;
 import com.xjz.springframework.circularDependency.BarCD;
 import com.xjz.springframework.circularDependency.FooCD;
 import com.xjz.springframework.config.AppConfig;
+import com.xjz.springframework.config.AppConfigV2;
+import com.xjz.springframework.config.bean.Country;
+import com.xjz.springframework.config.bean.OhMyBean;
 import com.xjz.springframework.controller.OhMyController;
 import com.xjz.springframework.domain.Foo;
 import com.xjz.springframework.domain.Person;
@@ -373,6 +376,14 @@ public class AppTest {
 		System.out.println(applicationContext.getBean(Foo.class));*/
 		/*BarCD bean = applicationContext.getBean(BarCD.class);
 		System.out.println();*/
+	}
+
+	@DisplayName("测试@Configuration")
+	@Test
+	public void configuration() {
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfigV2.class);
+		// com.xjz.springframework.config.AppConfig$$EnhancerBySpringCGLIB$$38ee82f3@15669693
+		System.out.println(applicationContext.getBean(Country.class));
 	}
 
 }

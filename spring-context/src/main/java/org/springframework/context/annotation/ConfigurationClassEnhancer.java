@@ -275,6 +275,7 @@ class ConfigurationClassEnhancer {
 	private static class BeanMethodInterceptor implements MethodInterceptor, ConditionalCallback {
 
 		/**
+		 * 拦截Bean方法调用
 		 * Enhance a {@link Bean @Bean} method to check the supplied BeanFactory for the
 		 * existence of this bean object.
 		 * @throws Throwable as a catch-all for any exception that may be thrown when invoking the
@@ -315,7 +316,9 @@ class ConfigurationClassEnhancer {
 				}
 			}
 
-
+			// 判断当前执行的方法是否为正在执行的 @Bean 方法
+			// 因为存在在 userInfo() 方法中调用 country() 方法
+			// 如果 country() 也有 @Bean 注解，那么这个返回值就是 false.
 			if (isCurrentlyInvokedFactoryMethod(beanMethod)) {
 				// The factory is calling the bean method in order to instantiate and register the bean
 				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually
@@ -330,9 +333,11 @@ class ConfigurationClassEnhancer {
 									"these container lifecycle issues; see @Bean javadoc for complete details.",
 							beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));
 				}
+				// 执行执行父类方法创建Bean
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 			}
 
+			// 从Bean工厂中拿Bean
 			return resolveBeanReference(beanMethod, beanMethodArgs, beanFactory, beanName);
 		}
 

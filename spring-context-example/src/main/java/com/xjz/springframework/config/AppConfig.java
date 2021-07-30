@@ -13,7 +13,7 @@ import java.util.function.Supplier;
  * @description
  * @date 2021/7/10
  */
-@ComponentScan("com.xjz.springframework.circularDependency")
+//@ComponentScan("com.xjz.springframework.circularDependency")
 // <context:component-scan/> 或者 @ComponentScan 都能处理@Configuration 注解的类。
 // @Configuration注解的Bean会被解析成AnnotatedGenericBeanDefinition
 /**
@@ -23,7 +23,7 @@ import java.util.function.Supplier;
  * <p>
  * @Configuration也是通过无参构造器创建的Bean实例
  */
-//@Configuration(proxyBeanMethods = true) // 有没有@Configuration注解，@Bean注解的方法生成的Bean都会交给Spring容器管理
+@Configuration(proxyBeanMethods = true) // 有没有@Configuration注解，@Bean注解的方法生成的Bean都会交给Spring容器管理
 // 开启AOP
 @EnableAspectJAutoProxy // Enable @AspectJ 等同于XML中<aop:aspectj-autoproxy /> 启动@aspectj自动代理支持的标签
 public class AppConfig {
@@ -36,7 +36,7 @@ public class AppConfig {
 	@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 	public Foo foo() {
 		Foo foo = new Foo();
-		System.out.println("invoke foo= " + foo);
+		//System.out.println("invoke foo= " + foo);
 		return foo;
 	}
 
@@ -48,7 +48,7 @@ public class AppConfig {
 	@Bean // 把对象交给Spring容器管理
 	@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 	public Bar bar() {
-		System.out.println("bar  invoke foo() = " + foo());
+		//System.out.println("bar  invoke foo() = " + foo());
 		return new Bar();
 	}
 

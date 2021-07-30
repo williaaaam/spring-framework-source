@@ -8,6 +8,6 @@ package com.xjz.springframework.domain;
 public class Foo {
 
 	public Foo() {
-		//System.out.println("Foo no arg constructor");
+		System.out.println("Foo no arg constructor");
 	}
 }

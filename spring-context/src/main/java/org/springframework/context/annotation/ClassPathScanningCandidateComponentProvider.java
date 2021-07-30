@@ -312,6 +312,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
 		}
 		else {
+			// 正常情况下都是进入这个判断，对classpath下的class文件进行扫描
 			return scanCandidateComponents(basePackage);
 		}
 	}
@@ -413,10 +414,13 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
+		// 用来存储返回的bd的集合
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
+			// 拼接成这种形式：classpath*:com/dmz/spring
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
+			// 获取到所有的class文件封装而成的Resource对象
 			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
@@ -426,8 +430,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				}
 				if (resource.isReadable()) {
 					try {
+						// 通过Resource构建一个MetadataReader对象，这个MetadataReader对象包含了对应class文件的解析出来的class的元信息以及注解元信息
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
+						// 并不是所有的class文件文件都要被解析成为bd,只有被添加了注解（@Component,@Controller等）才是Spring中的组件
 						if (isCandidateComponent(metadataReader)) {
+							// 解析元信息（class元信息以及注解元信息）得到一个ScannedGenericBeanDefinition
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 							sbd.setSource(resource);
 							if (isCandidateComponent(sbd)) {

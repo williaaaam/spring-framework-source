@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 //@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class BarCD {
 	BarCD() {
-		System.out.println("Bar 无参构造器");
+		//System.out.println("Bar 无参构造器");
 	}
 
 	//@Autowired

@@ -168,9 +168,11 @@ class ConfigurationClassParser {
 
 
 	public void parse(Set<BeanDefinitionHolder> configCandidates) {
+		// 遍历所有的配置类，一个个完成解析
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
+				// 三个判断最终都会进入到同一个方法---->processConfigurationClass方法
 				if (bd instanceof AnnotatedBeanDefinition) {
 					parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());
 				}
@@ -223,17 +225,24 @@ class ConfigurationClassParser {
 
 
 	protected void processConfigurationClass(ConfigurationClass configClass, Predicate<String> filter) throws IOException {
+		// 解析@Conditional注解，判断是否需要解析
 		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
 			return;
 		}
 
+		// 判断解析器是否已经解析过这个配置类了
 		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
+		// 不为null,说明已经解析过了
 		if (existingClass != null) {
+			// 如果这个要被解析的配置类是被@Import注解导入的
 			if (configClass.isImported()) {
 				if (existingClass.isImported()) {
+					// 那么这个配置类的导入类集合中新增当前的配置类的导入类，（A通过@Import导入了B，那么A就是B的导入类，B被A导入）
 					existingClass.mergeImportedBy(configClass);
 				}
 				// Otherwise ignore new imported config class; existing non-imported class overrides it.
+				// 如果已经解析过的配置类不是被导入的，那么直接忽略新增的这个被导入的配置类。也就是说如果一个配置类同时被@Import导入以及正常的
+				// 添加到容器中，那么正常添加到容器中的配置类会覆盖被导入的类
 				return;
 			}
 			else {
@@ -255,6 +264,17 @@ class ConfigurationClassParser {
 	}
 
 	/**
+	 * 解析配置类中的内部类，看内部类中是否有配置类，如果有进行递归处理
+	 * 处理配置类上的@PropertySources跟@PropertySource注解
+	 * 处理@ComponentScan，@ComponentScans注解
+	 * 处理@Import注解
+	 * 处理@ImportResource注解
+	 * 处理@Bean注解
+	 * 处理接口中的default方法
+	 * 返回父类，让外部的循环继续处理当前配置类的父类
+	 * ————————————————
+	 * 版权声明：本文为CSDN博主「程序员DMZ」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+	 * 原文链接：https://blog.csdn.net/qq_41907991/article/details/105743462
 	 * Apply processing and build a complete {@link ConfigurationClass} by reading the
 	 * annotations, members and methods from the source class. This method can be called
 	 * multiple times as relevant sources are discovered.
@@ -287,7 +307,7 @@ class ConfigurationClassParser {
 
 		// Process any @ComponentScan annotations
 		/**
-		 * 处理@ComponentScans和@ComponentScan注解
+		 * 处理@ComponentScans和@ComponentScan注解,  // 处理@ComponentScan，@ComponentScans注解，真正进行扫描的地方就是这里
 		 */
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
@@ -295,14 +315,18 @@ class ConfigurationClassParser {
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
+				// 核心代码，在这里完成的扫描
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
+				// 检查扫描出来的bd是否是配置类，如果是配置类递归进行解析
 				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 					BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
+					// 在创建一个代理的bd（ScopeMode不是NO）时不会为null
 					if (bdCand == null) {
 						bdCand = holder.getBeanDefinition();
 					}
+					// 判断扫描出来的bd是否是一个配置类，如果是的话继续递归处理
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
 						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}
@@ -326,6 +350,7 @@ class ConfigurationClassParser {
 		}
 
 		// Process individual @Bean methods
+		// 将配置类中所有的被@Bean标注的方法添加到configClass的BeanMethod集合中
 		Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(sourceClass);
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));

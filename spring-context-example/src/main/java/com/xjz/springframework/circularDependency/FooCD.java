@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class FooCD {
 
 	FooCD() {
-		System.out.println("FooCD 无参构造器");
+		//System.out.println("FooCD 无参构造器");
 	}
 
 	//@Autowired
