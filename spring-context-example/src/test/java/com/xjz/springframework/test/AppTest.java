@@ -1,11 +1,7 @@
 package com.xjz.springframework.test;
 
-import com.xjz.springframework.circularDependency.BarCD;
-import com.xjz.springframework.circularDependency.FooCD;
 import com.xjz.springframework.config.AppConfig;
 import com.xjz.springframework.config.AppConfigV2;
-import com.xjz.springframework.config.bean.Country;
-import com.xjz.springframework.config.bean.OhMyBean;
 import com.xjz.springframework.controller.OhMyController;
 import com.xjz.springframework.domain.Foo;
 import com.xjz.springframework.domain.Person;
@@ -14,7 +10,6 @@ import com.xjz.springframework.factory.OhMyFactoryBean;
 import com.xjz.springframework.service.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
@@ -22,11 +17,15 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.cglib.core.DebuggingClassWriter;
+import org.springframework.cglib.proxy.*;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -383,7 +382,65 @@ public class AppTest {
 	public void configuration() {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfigV2.class);
 		// com.xjz.springframework.config.AppConfig$$EnhancerBySpringCGLIB$$38ee82f3@15669693
-		System.out.println(applicationContext.getBean(Country.class));
+		//System.out.println(applicationContext.getBean(Country.class));
+		System.out.println(applicationContext.getBean(Foo.class));
+	}
+
+
+	@DisplayName("测试CGLIB")
+	@Test
+	public void cglib() {
+		System.setProperty(DebuggingClassWriter.DEBUG_LOCATION_PROPERTY, "/Users/william/Dev/projects/spring-framework/spring-context-example");
+		Enhancer enhancer = new Enhancer();
+		enhancer.setSuperclass(Target.class);
+		// 设置回调
+		enhancer.setCallbacks(new Callback[]{new TargetMethodInterceptor(), NoOp.INSTANCE});
+		// 设置回调过滤器,lambda表达式的返回的是callback数组下标，0代表我们自定义的方法拦截器，1代表NoOp对象，表示不作任何操作
+		enhancer.setCallbackFilter(method -> 0);
+
+		// 创建代理对象
+		Target target = (Target) enhancer.create();
+		target.targetM1("Williami");
+		target.targetM2("SH");
+
+	}
+
+}
+
+
+class Target {
+
+	public void targetM1(String name) {
+		System.out.println("执行Target m1方法" + name);
+	}
+
+	public void targetM2(String address) {
+		System.out.println("执行Target m2方法 " + address);
+	}
+
+}
+
+class TargetMethodInterceptor implements MethodInterceptor {
+
+	/**
+	 * @param o           代理对象: Target$$EnhancerByCGLIB$$579999@1278(CGLIB$CALLBACK_0=TargetMethodInterceptor,CGLIB$CAKKBACK_1=NoOp)
+	 * @param method      目标方法
+	 * @param objects     目标方法参数
+	 * @param methodProxy 目标方法代理 sig1=targetM1(Ljava/lang/String;)V    sig2=CGLIB$targetM1$0(Ljava/lang/String;)V
+	 * @return
+	 * @throws Throwable
+	 */
+	@Override
+	public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+		//System.out.println("o = " + o);
+		//System.out.println("method = " + method);
+		//System.out.println("methodProxy = " + methodProxy);
+		//System.out.println("objects = " + Arrays.toString(objects));
+		System.out.println("开始执行目标对象方法");
+		Object invokeSuper = methodProxy.invokeSuper(o, objects);
+		System.out.println("结束执行目标对象方法");
+		return invokeSuper;
+
 	}
 
 }

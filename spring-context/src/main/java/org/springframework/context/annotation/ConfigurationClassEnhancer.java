@@ -333,7 +333,8 @@ class ConfigurationClassEnhancer {
 									"these container lifecycle issues; see @Bean javadoc for complete details.",
 							beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));
 				}
-				// 执行执行父类方法创建Bean
+				// 注解方法直接调用，执行执行父类方法创建Bean，这个Bean不被Spring容器管理，Scope定义失效，它也没有经历完整的生命周期，我们定义的后置处理器都没有作用到它身上
+				// 当然，AOP也是失效的
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 			}
 
@@ -448,6 +449,7 @@ class ConfigurationClassEnhancer {
 		 * to happen on Groovy classes).
 		 */
 		private boolean isCurrentlyInvokedFactoryMethod(Method method) {
+			// 容器当前执行工厂方法，比较方法名和参数类型
 			Method currentlyInvoked = SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod();
 			return (currentlyInvoked != null && method.getName().equals(currentlyInvoked.getName()) &&
 					Arrays.equals(method.getParameterTypes(), currentlyInvoked.getParameterTypes()));

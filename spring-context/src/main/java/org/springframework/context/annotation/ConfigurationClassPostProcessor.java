@@ -418,6 +418,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 								annotationMetadata != null && !ConfigurationClassUtils.hasBeanMethods(annotationMetadata));
 					if (!liteConfigurationCandidateWithoutBeanMethods) {
 						try {
+							// 加载配置类
 							abd.resolveBeanClass(this.beanClassLoader);
 						}
 						catch (Throwable ex) {

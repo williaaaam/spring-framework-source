@@ -180,6 +180,7 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
+	 * 将@Bean注解的方法解析成bd并注册到容器中
 	 * Read the given {@link BeanMethod}, registering bean definitions
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
