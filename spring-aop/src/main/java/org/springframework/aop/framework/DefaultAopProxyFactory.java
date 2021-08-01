@@ -23,6 +23,7 @@ import org.springframework.aop.SpringProxy;
 import org.springframework.core.NativeDetector;
 
 /**
+ * Spring中AopProxyFactory唯一实现类，用来创建cglib代理或者jdk代理
  * Default {@link AopProxyFactory} implementation, creating either a CGLIB proxy
  * or a JDK dynamic proxy.
  *
@@ -40,10 +41,10 @@ import org.springframework.core.NativeDetector;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
- * @since 12.03.2004
  * @see AdvisedSupport#setOptimize
  * @see AdvisedSupport#setProxyTargetClass
  * @see AdvisedSupport#setInterfaces
+ * @since 12.03.2004
  */
 @SuppressWarnings("serial")
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
@@ -51,6 +52,11 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
+		// 如果开启了优化，或者ProxyTargetClass设置为true
+		// 或者没有提供代理类需要实现的接口，那么使用cglib代理
+		// 在前面分析参数的时候已经说过了
+		// 默认情况下Optimize都为false,也不建议设置为true,因为会进行一些侵入性的优化
+		// 除非你对cglib的优化非常了解，否则不建议开启
 		if (!NativeDetector.inNativeImage() &&
 				(config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config))) {
 			Class<?> targetClass = config.getTargetClass();
@@ -58,17 +64,21 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 				throw new AopConfigException("TargetSource cannot determine target class: " +
 						"Either an interface or a target is required for proxy creation.");
 			}
+			// 需要注意的是，如果需要代理的类本身就是一个接口
+			// 或者需要被代理的类本身就是一个通过jdk动态代理生成的类
+			// 那么不管如何设置都会使用jdk动态代理
 			if (targetClass.isInterface() || Proxy.isProxyClass(targetClass)) {
 				return new JdkDynamicAopProxy(config);
 			}
 			return new ObjenesisCglibAopProxy(config);
-		}
-		else {
+		} else {
+			// 否则都是jdk动态代理
 			return new JdkDynamicAopProxy(config);
 		}
 	}
 
 	/**
+	 * 除了SprinProxy外，判断是否有用户提供的接口
 	 * Determine whether the supplied {@link AdvisedSupport} has only the
 	 * {@link org.springframework.aop.SpringProxy} interface specified
 	 * (or no proxy interfaces specified at all).

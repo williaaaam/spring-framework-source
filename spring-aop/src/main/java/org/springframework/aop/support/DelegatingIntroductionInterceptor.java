@@ -25,6 +25,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * 所谓的引入其实就是在方法执行的时候加了一层拦截，当判断这个方法是被引入的接口提供的方法的时候，那么就执行委托类中的逻辑而不是目标类中的方法
  * Convenient implementation of the
  * {@link org.springframework.aop.IntroductionInterceptor} interface.
  *
@@ -54,6 +55,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 		implements IntroductionInterceptor {
 
 	/**
+	 * 实际实现了引入逻辑的对象
 	 * Object that actually implements the interfaces.
 	 * May be "this" if a subclass implements the introduced interfaces.
 	 */
@@ -81,6 +83,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 
 
 	/**
+	 * // 对这个类进行初始化，要通过实际的实现类来找到具体要实现的接口
 	 * Both constructors use this init method, as it is impossible to pass
 	 * a "this" reference from one constructor to another.
 	 * @param delegate the delegate object
@@ -88,15 +91,22 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 	private void init(Object delegate) {
 		Assert.notNull(delegate, "Delegate must not be null");
 		this.delegate = delegate;
+		// 找到delegate实现的接口
 		implementInterfacesOnObject(delegate);
 
 		// We don't want to expose the control interface
+		// 因为我们可能会将DelegatingIntroductionInterceptor本身作为委托者
+		// Spring的设计就是不对外暴露这两个接口
+		// 如果将其暴露，意味着我们可以将代理类强转成这种类型
 		suppressInterface(IntroductionInterceptor.class);
 		suppressInterface(DynamicIntroductionAdvice.class);
 	}
 
 
 	/**
+	 * // 引入通知本身也是基于拦截器实现的，当执行一个方法时需要判断这个方法
+	 *     // 是不是被引入的接口中定义的方法，如果是的话，那么不能调用目标类的方法
+	 *     // 而要调用委托类的方法
 	 * Subclasses may need to override this if they want to perform custom
 	 * behaviour in around advice. However, subclasses should invoke this
 	 * method, which handles introduced interfaces and forwarding to the target.
@@ -118,9 +128,12 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 					retVal = proxy;
 				}
 			}
+
 			return retVal;
 		}
-
+		// 执行到这里说明不是引入的方法，这是Spring提供了一个扩展逻辑
+		// 正常来说这个类只会处理引入的逻辑，通过这个方法可以对目标类中的方法做拦截
+		// 不常用
 		return doProceed(mi);
 	}
 

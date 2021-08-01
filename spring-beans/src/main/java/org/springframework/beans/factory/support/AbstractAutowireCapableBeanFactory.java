@@ -1403,12 +1403,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	@SuppressWarnings("deprecation")  // for postProcessPropertyValues
 	protected void populateBean(String beanName, RootBeanDefinition mbd, @Nullable BeanWrapper bw) {
 		if (bw == null) {
+			// 如果创建的对象为空，但是又配置了需要注入的属性的话，那么直接报错
 			if (mbd.hasPropertyValues()) {
 				throw new BeanCreationException(
 						mbd.getResourceDescription(), beanName, "Cannot apply property values to null instance");
 			}
 			else {
 				// Skip property population phase for null instance.
+				// 空实例不进行注入
 				return;
 			}
 		}
@@ -1416,6 +1418,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
 		// state of the bean before properties are set. This can be used, for example,
 		// to support styles of field injection.
+		// 满足两个条件，不是合成类 && 存在InstantiationAwareBeanPostProcessor
+		// 其中InstantiationAwareBeanPostProcessor主要作用就是作为Bean的实例化前后的钩子
+		// 外加完成属性注入，对于三个方法就是
+		// postProcessBeforeInstantiation  创建对象前调用
+		// postProcessAfterInstantiation   对象创建完成，@AutoWired注解解析后调用
+		// postProcessPropertyValues（已过期，被postProcessProperties替代） 进行属性注入
+		// 下面这段代码的主要作用就是我们可以提供一个InstantiationAwareBeanPostProcessor
+		// 提供的这个后置处理如果实现了postProcessAfterInstantiation方法并且返回false
+		// 那么可以跳过Spring默认的属性注入，但是这也意味着我们要自己去实现属性注入的逻辑
+		// 所以一般情况下，我们也不会这么去扩展
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {
 				if (!bp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
@@ -1424,9 +1436,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
+		// 判断是否提供了属性相关配置
 		PropertyValues pvs = (mbd.hasPropertyValues() ? mbd.getPropertyValues() : null);
 
+		// 确认注入模型
 		int resolvedAutowireMode = mbd.getResolvedAutowireMode();
+
+		// 主要处理byName跟byType两种注入模型，byConstructor这种注入模型在创建对象的时候已经处理过了
+		// 这里都是对自动注入进行处理，byName跟byType两种注入模型均是依赖setter方法
+		// byName,根据setter方法的名字来查找对应的依赖，例如setA,那么就是去容器中查找名字为a的Bean
+		// byType,根据setter方法的参数类型来查找对应的依赖，例如setXx(A a)，就是去容器中查询类型为A的bean
+
 		if (resolvedAutowireMode == AUTOWIRE_BY_NAME || resolvedAutowireMode == AUTOWIRE_BY_TYPE) {
 			MutablePropertyValues newPvs = new MutablePropertyValues(pvs);
 			// Add property values based on autowire by name if applicable.
@@ -1440,10 +1460,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			pvs = newPvs;
 		}
 
+		// 检查是否有InstantiationAwareBeanPostProcessor
+		// 前面说过了，这个后置处理器就是来完成属性注入的
 		boolean hasInstAwareBpps = hasInstantiationAwareBeanPostProcessors();
+
+		// 是否需要依赖检查，默认不会进行依赖检查的
 		boolean needsDepCheck = (mbd.getDependencyCheck() != AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
 
 		PropertyDescriptor[] filteredPds = null;
+		// 存在InstantiationAwareBeanPostProcessor，我们需要调用这类后置处理器的方法进行注入
 		if (hasInstAwareBpps) {
 			if (pvs == null) {
 				pvs = mbd.getPropertyValues();
@@ -1464,9 +1489,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 		if (needsDepCheck) {
+			// 得到需要进行依赖检查的属性的集合
 			if (filteredPds == null) {
 				filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
 			}
+			// 对需要进行依赖检查的属性进行依赖检查
 			checkDependencies(beanName, mbd, filteredPds, pvs);
 		}
 

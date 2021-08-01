@@ -1,5 +1,7 @@
 package com.xjz.springframework.test;
 
+import com.sun.tools.sjavac.comp.PubAPIs;
+import com.xjz.springframework.aop.v2.*;
 import com.xjz.springframework.config.AppConfig;
 import com.xjz.springframework.config.AppConfigV2;
 import com.xjz.springframework.controller.OhMyController;
@@ -10,6 +12,8 @@ import com.xjz.springframework.factory.OhMyFactoryBean;
 import com.xjz.springframework.service.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
@@ -383,7 +387,7 @@ public class AppTest {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfigV2.class);
 		// com.xjz.springframework.config.AppConfig$$EnhancerBySpringCGLIB$$38ee82f3@15669693
 		//System.out.println(applicationContext.getBean(Country.class));
-		System.out.println(applicationContext.getBean(Foo.class));
+		//System.out.println(applicationContext.getBean(Foo.class));
 	}
 
 
@@ -438,8 +442,52 @@ class TargetMethodInterceptor implements MethodInterceptor {
 		//System.out.println("objects = " + Arrays.toString(objects));
 		System.out.println("开始执行目标对象方法");
 		Object invokeSuper = methodProxy.invokeSuper(o, objects);
+		// StackOverFlow:每次都是直接调用目标对象方法，而又被方法拦截器拦截，导致无限执行intercept方法
+		//Object invoke = methodProxy.invoke(o, objects);
 		System.out.println("结束执行目标对象方法");
 		return invokeSuper;
+
+	}
+
+
+	@DisplayName("测试api方式的AOP")
+	@Test
+	public void aop2() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+
+
+		// 添加绑定了指定切点的环绕通知
+		// 本例中：环绕通知不应用于toString方法
+		// 前置、后置通知依然可以应用于toString方法
+		proxyFactory.addAdvisor(new DefaultPointcutAdvisor(new OhMyPoint(), new OhMyAroundAdvice()));
+
+		proxyFactory.addAdvice(new OhMyAfterReturnAdvice());
+
+		proxyFactory.addAdvice(new OhMyBeforeAdvice());
+
+
+		// 为代理类引入一个新的需要实现的接口----Runnable
+		proxyFactory.addAdvice(new OhMyIntroductionAdvice());
+
+		// 设置目标
+		proxyFactory.setTarget(new AopOhMyService());
+
+		// 因为要测试代理类对象自己定义的方法，所以这里启动cglib代理
+		proxyFactory.setProxyTargetClass(true);
+
+		// 创建代理对象
+		Object proxy = proxyFactory.getProxy();
+
+		proxy.toString();
+
+		if (proxy instanceof AopOhMyService) {
+			((AopOhMyService) proxy).testAop();
+		}
+
+		if (proxy instanceof Runnable) {
+			((Runnable) proxy).run();
+		}
+
 
 	}
 

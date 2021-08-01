@@ -21,6 +21,7 @@ import java.io.Serializable;
 import org.springframework.util.Assert;
 
 /**
+ * 所有AOP代理工厂的父类，它包含了创建一个AOP代理所需要的基础的通用的一些配置信息
  * Convenience superclass for configuration used in creating proxies,
  * to ensure that all proxy creators have consistent properties.
  *
@@ -34,14 +35,31 @@ public class ProxyConfig implements Serializable {
 	private static final long serialVersionUID = -8409359707199703185L;
 
 
+	/**
+	 * 默认jdk代理
+	 */
 	private boolean proxyTargetClass = false;
 
+
+	// 是否启用优化，默认为false，按照官网对这个参数的解释
+	// 这个优化是针对cglib，如果设计为true的话，会做一些侵入性的优化
+	// 是否开启在jdk代理的情况下没有影响
+	// 官网中特地说明了，除非对cglib的优化非常了解，否则不要开启这个参数
 	private boolean optimize = false;
 
+
+	// 生成的代理类是否需要实现Advised接口，这个接口可以向外提供操作通知的方法
+	// 如果为false会实现
+	// 为true的话，不会实现
 	boolean opaque = false;
 
+
+	// 是否将当前的配置类暴露到一个线程上下文中，如果设置为true的话
+	// 可以通过AopContext.currentProxy()来获取到当前的代理对象
 	boolean exposeProxy = false;
 
+
+	// 标志着是否冻结整个配置，如果冻结了，那么配置信息将不允许修改
 	private boolean frozen = false;
 
 

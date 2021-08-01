@@ -66,14 +66,14 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
- * @since 3.0
  * @see #enhance
  * @see ConfigurationClassPostProcessor
+ * @since 3.0
  */
 class ConfigurationClassEnhancer {
 
 	// The callbacks to use. Note that these callbacks must be stateless.
-	private static final Callback[] CALLBACKS = new Callback[] {
+	private static final Callback[] CALLBACKS = new Callback[]{
 			new BeanMethodInterceptor(),
 			new BeanFactoryAwareMethodInterceptor(),
 			NoOp.INSTANCE
@@ -92,20 +92,23 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Loads the specified class and generates a CGLIB subclass of it equipped with
 	 * container-aware callbacks capable of respecting scoping and other bean semantics.
+	 *
 	 * @return the enhanced subclass
 	 */
 	public Class<?> enhance(Class<?> configClass, @Nullable ClassLoader classLoader) {
+		// 如果已经实现了EnhancedConfiguration接口，说明被代理过了，直接返回
 		if (EnhancedConfiguration.class.isAssignableFrom(configClass)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Ignoring request to enhance %s as it has " +
-						"already been enhanced. This usually indicates that more than one " +
-						"ConfigurationClassPostProcessor has been registered (e.g. via " +
-						"<context:annotation-config>). This is harmless, but you may " +
-						"want check your configuration and remove one CCPP if possible",
+								"already been enhanced. This usually indicates that more than one " +
+								"ConfigurationClassPostProcessor has been registered (e.g. via " +
+								"<context:annotation-config>). This is harmless, but you may " +
+								"want check your configuration and remove one CCPP if possible",
 						configClass.getName()));
 			}
 			return configClass;
 		}
+		// 否则调用newEnhancer方法先创建一个增强器，然后直接使用这个增强器生成代理类的字节码对象
 		Class<?> enhancedClass = createClass(newEnhancer(configClass, classLoader));
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Successfully enhanced %s; enhanced class name is: %s",
@@ -119,11 +122,19 @@ class ConfigurationClassEnhancer {
 	 */
 	private Enhancer newEnhancer(Class<?> configSuperClass, @Nullable ClassLoader classLoader) {
 		Enhancer enhancer = new Enhancer();
+		// 设置目标代理类
 		enhancer.setSuperclass(configSuperClass);
-		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
+		// 让代理类实现EnhancedConfiguration接口，这个接口继承了BeanFactoryAware接口
+		// 主要两个作用：1.起到标记作用，如果实现了，代表已经被代理过了
+		// 2.代理类需要访问BeanFactory，所以实现了BeanFactoryAware接口
+		enhancer.setInterfaces(new Class<?>[]{EnhancedConfiguration.class});
+		// 设置生成的代理类不实现factory接口
 		enhancer.setUseFactory(false);
+		// 设置代理类名称的生成策略
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+		// 代理类中引入一个BeanFactory字段
 		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
+		// 设置过滤器
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
 		return enhancer;
@@ -159,6 +170,7 @@ class ConfigurationClassEnhancer {
 
 	/**
 	 * Conditional {@link Callback}.
+	 *
 	 * @see ConditionalCallbackFilter
 	 */
 	private interface ConditionalCallback extends Callback {
@@ -232,6 +244,7 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Intercepts the invocation of any {@link BeanFactoryAware#setBeanFactory(BeanFactory)} on
 	 * {@code @Configuration} class instances for the purpose of recording the {@link BeanFactory}.
+	 *
 	 * @see EnhancedConfiguration
 	 */
 	private static class BeanFactoryAwareMethodInterceptor implements MethodInterceptor, ConditionalCallback {
@@ -239,18 +252,27 @@ class ConfigurationClassEnhancer {
 		@Override
 		@Nullable
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+			// 在生成代理类的字节码时，使用了BeanFactoryAwareGeneratorStrategy策略
+			// 这个策略会在代理类中添加一个字段，BEAN_FACTORY_FIELD = "$$beanFactory"
 			Field field = ReflectionUtils.findField(obj.getClass(), BEAN_FACTORY_FIELD);
 			Assert.state(field != null, "Unable to find generated BeanFactory field");
+			// 此时调用的方法是setBeanFactory方法，
+			// 直接通过反射将beanFactory赋值给BEAN_FACTORY_FIELD字段
 			field.set(obj, args[0]);
 
 			// Does the actual (non-CGLIB) superclass implement BeanFactoryAware?
 			// If so, call its setBeanFactory() method. If not, just exit.
+			// 如果目标配置类直接实现了BeanFactoryAware接口，那么直接调用目标类的setBeanFactory方法
 			if (BeanFactoryAware.class.isAssignableFrom(ClassUtils.getUserClass(obj.getClass().getSuperclass()))) {
 				return proxy.invokeSuper(obj, args);
 			}
 			return null;
 		}
 
+		// 在调用setBeanFactory方法时才会拦截
+		// 从前文我们知道，代理类是实现了实现EnhancedConfiguration接口的，
+		// 这就意味着它也实现了BeanFactoryAware接口，那么在创建配置类时，
+		// setBeanFactory方法就会被调用，之后会就进入到这个拦截器的intercept方法逻辑中
 		@Override
 		public boolean isMatch(Method candidateMethod) {
 			return isSetBeanFactory(candidateMethod);
@@ -269,6 +291,7 @@ class ConfigurationClassEnhancer {
 	 * 拦截@Bean注解方法的调用，保证像aop代理和scope bean等语义的处理
 	 * Intercepts the invocation of any {@link Bean}-annotated methods in order to ensure proper
 	 * handling of bean semantics such as scoping and AOP proxying.
+	 *
 	 * @see Bean
 	 * @see ConfigurationClassEnhancer
 	 */
@@ -278,21 +301,28 @@ class ConfigurationClassEnhancer {
 		 * 拦截Bean方法调用
 		 * Enhance a {@link Bean @Bean} method to check the supplied BeanFactory for the
 		 * existence of this bean object.
+		 *
 		 * @throws Throwable as a catch-all for any exception that may be thrown when invoking the
-		 * super implementation of the proxied method i.e., the actual {@code @Bean} method
+		 *                   super implementation of the proxied method i.e., the actual {@code @Bean} method
 		 */
 		@Override
 		@Nullable
 		public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,
-					MethodProxy cglibMethodProxy) throws Throwable {
+								MethodProxy cglibMethodProxy) throws Throwable {
 
+			// 之前不是给BEAN_FACTORY_FIELD这个字段赋值了BeanFactory吗，这里就是反射获取之前赋的值
 			ConfigurableBeanFactory beanFactory = getBeanFactory(enhancedConfigInstance);
+			// 确定Bean的名称
 			String beanName = BeanAnnotationHelper.determineBeanNameFor(beanMethod);
 
+
 			// Determine whether this bean is a scoped-proxy
+			// 存在@Scope注解，并且开启了域代理模式
 			if (BeanAnnotationHelper.isScopedProxy(beanMethod)) {
 				String scopedBeanName = ScopedProxyCreator.getTargetBeanName(beanName);
+				// 域代理对象的目标对象正在被创建,什么时候会被创建？当然是使用的时候嘛
 				if (beanFactory.isCurrentlyInCreation(scopedBeanName)) {
+					// 使用的时候调用@Bean方法来创建这个域代理的目标对象，所以@Bean方法代理的时候针对的是域代理的目标对象，目标对象需要通过getBean的方式创建
 					beanName = scopedBeanName;
 				}
 			}
@@ -304,13 +334,19 @@ class ConfigurationClassEnhancer {
 			// proxy that intercepts calls to getObject() and returns any cached bean instance.
 			// This ensures that the semantics of calling a FactoryBean from within @Bean methods
 			// is the same as that of referring to a FactoryBean within XML. See SPR-6602.
+			// 判断这个bean是否是一个factoryBean
 			if (factoryContainsBean(beanFactory, BeanFactory.FACTORY_BEAN_PREFIX + beanName) &&
 					factoryContainsBean(beanFactory, beanName)) {
 				Object factoryBean = beanFactory.getBean(BeanFactory.FACTORY_BEAN_PREFIX + beanName);
 				if (factoryBean instanceof ScopedProxyFactoryBean) {
 					// Scoped proxy factory beans are a special case and should not be further proxied
-				}
-				else {
+					// ScopedProxyFactoryBean还记得吗？在进行域代理时使用的就是这个对象
+					// 对于这个FactoryBean我们是不需要进行代理的，因为这个factoryBean的getObject方法
+					// 只是为了得到一个类似于占位符的Bean,这个Bean只是为了让依赖它的Bean在创建的过程中不会报错
+					// 所以对于这个FactoryBean我们是不需要进行代理的
+					// 我们只需要保证这个FactoryBean所生成的代理对象的目标对象是通过getBean的方式创建的即可
+				} else {
+					// 而对于普通的FactoryBean我们需要代理其getObject方法，确保getObject方法产生的Bean是通过getBean的方式创建的
 					// It is a candidate FactoryBean - go ahead with enhancement
 					return enhanceFactoryBean(factoryBean, beanMethod.getReturnType(), beanFactory, beanName);
 				}
@@ -319,6 +355,10 @@ class ConfigurationClassEnhancer {
 			// 判断当前执行的方法是否为正在执行的 @Bean 方法
 			// 因为存在在 userInfo() 方法中调用 country() 方法
 			// 如果 country() 也有 @Bean 注解，那么这个返回值就是 false.
+
+			// 举个例子，假设我们被@Bean标注的是A方法，当前创建的BeanName也是a，这样就符合了这个条件
+			// 但是如果是这种请求，a(){b()},a方法中调用的b方法，那么此时调用b方法创建b对象时正在执行的就是a方法
+			// 此时就不满足这个条件，会调用这个resolveBeanReference方法来解决方法引用
 			if (isCurrentlyInvokedFactoryMethod(beanMethod)) {
 				// The factory is calling the bean method in order to instantiate and register the bean
 				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually
@@ -335,6 +375,9 @@ class ConfigurationClassEnhancer {
 				}
 				// 注解方法直接调用，执行执行父类方法创建Bean，这个Bean不被Spring容器管理，Scope定义失效，它也没有经历完整的生命周期，我们定义的后置处理器都没有作用到它身上
 				// 当然，AOP也是失效的
+
+				// 如果当前执行的方法就是这个被拦截的方法，（说明是在创建这个Bean的过程中）
+				// 那么直接执行目标类中的方法，也就是我们在配置类中用@Bean标注的方法
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 			}
 
@@ -343,17 +386,25 @@ class ConfigurationClassEnhancer {
 		}
 
 		private Object resolveBeanReference(Method beanMethod, Object[] beanMethodArgs,
-				ConfigurableBeanFactory beanFactory, String beanName) {
+											ConfigurableBeanFactory beanFactory, String beanName) {
 
 			// The user (i.e. not the factory) is requesting this bean through a call to
 			// the bean method, direct or indirect. The bean may have already been marked
 			// as 'in creation' in certain autowiring scenarios; if so, temporarily set
 			// the in-creation status to false in order to avoid an exception.
+			// 什么时候会是alreadyInCreation？
+			// 就是正在创建中，当Spring完成扫描后得到了所有的BeanDefinition
+			// 那么之后就会遍历所有的BeanDefinition，根据BeanDefinition一个个的创建Bean，在创建Bean前会将这个Bean
+			// 标记为正在创建的，如果是正在创建的Bean,先将其标记为非正在创建，也就是这行代码beanFactory.setCurrentlyInCreation(beanName, false)
+			// 这是因为之后又会调用getBean方法，如果已经被标记为创建中了，那么在调用getBean时会报错
 			boolean alreadyInCreation = beanFactory.isCurrentlyInCreation(beanName);
 			try {
+				// 如果是正在创建的Bean,先将其标记为非正在创建，避免后续调用getBean时报错
 				if (alreadyInCreation) {
 					beanFactory.setCurrentlyInCreation(beanName, false);
 				}
+
+				// 调用beanMethod时候，也就是被@bean注解的方法如果使用了参数，只要有一个参数为null,就直接调用getBean(),否则带参数调用getBean(beanName,args)
 				boolean useArgs = !ObjectUtils.isEmpty(beanMethodArgs);
 				if (useArgs && beanFactory.isSingleton(beanName)) {
 					// Stubbed null arguments just for reference purposes,
@@ -366,50 +417,66 @@ class ConfigurationClassEnhancer {
 						}
 					}
 				}
+
+				// 					beanFactory.setCurrentlyInCreation(beanName, false);
 				Object beanInstance = (useArgs ? beanFactory.getBean(beanName, beanMethodArgs) :
 						beanFactory.getBean(beanName));
+				// 说明BeanDefinition中的beanClass被替换了
 				if (!ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
 					// Detect package-protected NullBean instance through equals(null) check
 					if (beanInstance.equals(null)) {
 						if (logger.isDebugEnabled()) {
 							logger.debug(String.format("@Bean method %s.%s called as bean reference " +
-									"for type [%s] returned null bean; resolving to null value.",
+											"for type [%s] returned null bean; resolving to null value.",
 									beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName(),
 									beanMethod.getReturnType().getName()));
 						}
 						beanInstance = null;
-					}
-					else {
+					} else {
 						String msg = String.format("@Bean method %s.%s called as bean reference " +
-								"for type [%s] but overridden by non-compatible bean instance of type [%s].",
+										"for type [%s] but overridden by non-compatible bean instance of type [%s].",
 								beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName(),
 								beanMethod.getReturnType().getName(), beanInstance.getClass().getName());
 						try {
 							BeanDefinition beanDefinition = beanFactory.getMergedBeanDefinition(beanName);
 							msg += " Overriding bean of same name declared in: " + beanDefinition.getResourceDescription();
-						}
-						catch (NoSuchBeanDefinitionException ex) {
+						} catch (NoSuchBeanDefinitionException ex) {
 							// Ignore - simply no detailed message then.
 						}
 						throw new IllegalStateException(msg);
 					}
 				}
+
+				// 注册Bean之间的依赖关系
+				// 这个method是当前执行的一个创建bean的方法
 				Method currentlyInvoked = SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod();
+				// 不等于null意味着currentlyInvoked这个方法创建的bean依赖了beanName所代表的Bean
+				// 在开头的例子中，currentlyInvoked就是a(),beanName就是dmzService,outBeanName就是a
 				if (currentlyInvoked != null) {
 					String outerBeanName = BeanAnnotationHelper.determineBeanNameFor(currentlyInvoked);
+					// 注册Bean依赖
 					beanFactory.registerDependentBean(beanName, outerBeanName);
 				}
 				return beanInstance;
-			}
-			finally {
+			} finally {
 				if (alreadyInCreation) {
+					// 实际还在创建中，要走完整个生命周期流程
 					beanFactory.setCurrentlyInCreation(beanName, true);
 				}
 			}
 		}
 
+		/**
+		 * 执行时机：
+		 *
+		 * @param candidateMethod
+		 * @return
+		 */
 		@Override
 		public boolean isMatch(Method candidateMethod) {
+			// 第一个条件，不能是Object，这个必定是满足的
+			// 第二个条件，不能是setBeanFactory方法，显而易见的嘛，我们要拦截的方法实际只应该是添加了@Bean注解的方法
+			// 第三个条件，添加了@Bean注解
 			return (candidateMethod.getDeclaringClass() != Object.class &&
 					!BeanFactoryAwareMethodInterceptor.isSetBeanFactory(candidateMethod) &&
 					BeanAnnotationHelper.isBeanAnnotated(candidateMethod));
@@ -435,6 +502,7 @@ class ConfigurationClassEnhancer {
 		 * <p>Said another way, this check repurposes
 		 * {@link ConfigurableBeanFactory#isCurrentlyInCreation(String)} to determine whether
 		 * the container is calling this method or the user is calling this method.
+		 *
 		 * @param beanName name of bean to check for
 		 * @return whether <var>beanName</var> already exists in the factory
 		 */
@@ -463,7 +531,7 @@ class ConfigurationClassEnhancer {
 		 * it will not be proxied. This too is aligned with the way XML configuration works.
 		 */
 		private Object enhanceFactoryBean(final Object factoryBean, Class<?> exposedType,
-				final ConfigurableBeanFactory beanFactory, final String beanName) {
+										  final ConfigurableBeanFactory beanFactory, final String beanName) {
 
 			try {
 				Class<?> clazz = factoryBean.getClass();
@@ -478,8 +546,7 @@ class ConfigurationClassEnhancer {
 									" is final: Otherwise a getObject() call would not be routed to the factory.");
 						}
 						return createInterfaceProxyForFactoryBean(factoryBean, exposedType, beanFactory, beanName);
-					}
-					else {
+					} else {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Unable to proxy FactoryBean '" + beanName + "' of type [" +
 									clazz.getName() + "] for use within another @Bean method because its " +
@@ -490,8 +557,7 @@ class ConfigurationClassEnhancer {
 						return factoryBean;
 					}
 				}
-			}
-			catch (NoSuchMethodException ex) {
+			} catch (NoSuchMethodException ex) {
 				// No getObject() method -> shouldn't happen, but as long as nobody is trying to call it...
 			}
 
@@ -499,10 +565,10 @@ class ConfigurationClassEnhancer {
 		}
 
 		private Object createInterfaceProxyForFactoryBean(final Object factoryBean, Class<?> interfaceType,
-				final ConfigurableBeanFactory beanFactory, final String beanName) {
+														  final ConfigurableBeanFactory beanFactory, final String beanName) {
 
 			return Proxy.newProxyInstance(
-					factoryBean.getClass().getClassLoader(), new Class<?>[] {interfaceType},
+					factoryBean.getClass().getClassLoader(), new Class<?>[]{interfaceType},
 					(proxy, method, args) -> {
 						if (method.getName().equals("getObject") && args == null) {
 							return beanFactory.getBean(beanName);
@@ -512,7 +578,7 @@ class ConfigurationClassEnhancer {
 		}
 
 		private Object createCglibProxyForFactoryBean(final Object factoryBean,
-				final ConfigurableBeanFactory beanFactory, final String beanName) {
+													  final ConfigurableBeanFactory beanFactory, final String beanName) {
 
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(factoryBean.getClass());
@@ -527,8 +593,7 @@ class ConfigurationClassEnhancer {
 			if (objenesis.isWorthTrying()) {
 				try {
 					fbProxy = objenesis.newInstance(fbClass, enhancer.getUseCache());
-				}
-				catch (ObjenesisException ex) {
+				} catch (ObjenesisException ex) {
 					logger.debug("Unable to instantiate enhanced FactoryBean using Objenesis, " +
 							"falling back to regular construction", ex);
 				}
@@ -537,8 +602,7 @@ class ConfigurationClassEnhancer {
 			if (fbProxy == null) {
 				try {
 					fbProxy = ReflectionUtils.accessibleConstructor(fbClass).newInstance();
-				}
-				catch (Throwable ex) {
+				} catch (Throwable ex) {
 					throw new IllegalStateException("Unable to instantiate enhanced FactoryBean using Objenesis, " +
 							"and regular FactoryBean instantiation via default constructor fails as well", ex);
 				}

@@ -116,20 +116,35 @@ public abstract class AopProxyUtils {
 	 * @see DecoratingProxy
 	 */
 	static Class<?>[] completeProxiedInterfaces(AdvisedSupport advised, boolean decoratingProxy) {
+		// 第一步：获取在配置中指定的需要实现的接口
 		Class<?>[] specifiedInterfaces = advised.getProxiedInterfaces();
+
+
+		// 第二步：如果没有指定需要实现的接口，但是需要代理的目标类本身就是一个接口
+		// 那么将其添加到代理类需要实现的接口的集合中
+		// 如果目标类本身不是一个接口，但是是经过jdk代理后的一个类
+		// 那么获取这个代理后的类所有实现的接口，并添加到需要实现的接口集合中
 		if (specifiedInterfaces.length == 0) {
 			// No user-specified interfaces: check whether target class is an interface.
 			Class<?> targetClass = advised.getTargetClass();
 			if (targetClass != null) {
+				//目标类本身就是一个接口，则将其添加到需要实现的接口集合中
 				if (targetClass.isInterface()) {
 					advised.setInterfaces(targetClass);
 				}
-				else if (Proxy.isProxyClass(targetClass)) {
+				else if (Proxy.isProxyClass(targetClass)) { // jdk动态代理后的类(extends Proxy)
 					advised.setInterfaces(targetClass.getInterfaces());
 				}
 				specifiedInterfaces = advised.getProxiedInterfaces();
 			}
 		}
+
+		// 第三步：为代理类添加三个默认需要实现的接口，分别是
+		// 1.SpringProxy,一个标记接口，代表这个类是通过Spring的AOP代理生成的
+		// 2.Advised，提供了管理通知的方法
+		// 3.DecoratingProxy，用户获取到真实的目标对象
+		// 这个真实对象指的是在嵌套代理的情况下会获取到最终的目标对象
+		// 而不是指返回这个ProxyFactory的target
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
 		boolean addAdvised = !advised.isOpaque() && !advised.isInterfaceProxied(Advised.class);
 		boolean addDecoratingProxy = (decoratingProxy && !advised.isInterfaceProxied(DecoratingProxy.class));

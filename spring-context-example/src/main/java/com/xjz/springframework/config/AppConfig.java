@@ -24,7 +24,10 @@ import java.util.function.Supplier;
  * @Configuration也是通过无参构造器创建的Bean实例
  */
 @Configuration(proxyBeanMethods = true) // 有没有@Configuration注解，@Bean注解的方法生成的Bean都会交给Spring容器管理
-// 开启AOP
+// 开启AOP自动代理
+/**
+ * 实际上是通过导入AspectJAutoProxyRegistrar类向Spring容器中注入实现了BeanPostProcessor的AnnotationAwareAspectJAnnotationAutoProxyCreator
+ */
 @EnableAspectJAutoProxy // Enable @AspectJ 等同于XML中<aop:aspectj-autoproxy /> 启动@aspectj自动代理支持的标签
 public class AppConfig {
 

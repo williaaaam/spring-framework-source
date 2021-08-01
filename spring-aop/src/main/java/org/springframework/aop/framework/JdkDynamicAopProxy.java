@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
+ * 这个类本身就是一个InvocationHandler，这意味着当调用代理对象中的方法时，最终会调用到JdkDynamicAopProxy的invoke方法
  * JDK-based {@link AopProxy} implementation for the Spring AOP framework,
  * based on JDK {@link java.lang.reflect.Proxy dynamic proxies}.
  *
@@ -108,7 +109,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			throw new AopConfigException("No advisors and no TargetSource specified");
 		}
 		this.advised = config;
+		// 获取代理类需要实现的所有接口
 		this.proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised, true);
+		// 需要明确是否在接口定义了hashCode以及equals方法
+		// 如果接口中没有定义，那么在调用代理对象的equals方法的时候
+		// 如果两个对象相等，那么意味着它们的目标对象，通知以及实现的接口都相同
 		findDefinedEqualsAndHashCodeMethods(this.proxiedInterfaces);
 	}
 
@@ -164,6 +169,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		Object target = null;
 
 		try {
+			// 首先处理的是hashCode跟equals方法
+			// 如果接口中没有定义这两个方法，那么会调用本类中定义的equals方法
+			// 前面我们也说过了，只有当两个类的目标对象，通知以及实现的接口都相等的情况下
+			// equals才会返回true
+			// 如果接口中定义了这两个方法，那么最终会调用目标对象中的方法
 			if (!this.equalsDefined && AopUtils.isEqualsMethod(method)) {
 				// The target does not implement the equals(Object) method itself.
 				return equals(args[0]);

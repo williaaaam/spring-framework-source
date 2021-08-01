@@ -288,6 +288,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
+		//传入的name可能时& + beanName这种形式，这里做的就是去除掉&，得到beanName
 		// 1.获取bean名称，校验Bean名称正确性
 		String beanName = transformedBeanName(name);
 		Object beanInstance;
@@ -304,15 +305,21 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.trace("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
+			// 如果直接从单例池中获取到了这个bean(sharedInstance),我们能直接返回吗？
+			// 当然不能，因为获取到的Bean可能是一个factoryBean,
+			// 如果我们传入的name是 & + beanName 这种形式的话，那是可以返回的，但是我们传入的更可能是一个beanName，那么这个时候Spring就还需要调用这个sharedInstance的getObject方法来创建真正被需要的Bean
 			beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		} else {
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
+			//     // 在缓存中获取不到这个Bean
+			//            // 原型下的循环依赖直接报错
 			if (isPrototypeCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
 
 			// Check if bean definition exists in this factory.
+			// 如果找不到，就再从父容器中查找
 			BeanFactory parentBeanFactory = getParentBeanFactory();
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// Not found -> check parent.
@@ -331,6 +338,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 
+			// 如果不仅仅是为了类型推断，也就是代表我们要对进行实例化(actual use)
+			// 那么就将bean标记为正在创建中，其实就是将这个beanName放入到alreadyCreated这个set集合中
 			if (!typeCheckOnly) {
 				markBeanAsCreated(beanName);
 			}
@@ -345,15 +354,19 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				checkMergedBeanDefinition(mbd, beanName, args);
 
 				// Guarantee initialization of beans that the current bean depends on.
+				// @DependsOn注解标注的当前这个Bean所依赖的bean名称的集合，就是说在创建当前这个Bean前，必须要先将其依赖的Bean先完成创建
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
 					for (String dep : dependsOn) {
+						// 如果这个bean所依赖的bean又依赖了当前这个bean,出现了循环依赖，直接报错
 						if (isDependent(beanName, dep)) {
 							throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 									"Circular depends-on relationship between '" + beanName + "' and '" + dep + "'");
 						}
+						// 注册bean跟其依赖的依赖关系，key为依赖，value为依赖所从属的bean
 						registerDependentBean(dep, beanName);
 						try {
+							// 创建依赖Bean
 							getBean(dep);
 						} catch (NoSuchBeanDefinitionException ex) {
 							throw new BeanCreationException(mbd.getResourceDescription(), beanName,

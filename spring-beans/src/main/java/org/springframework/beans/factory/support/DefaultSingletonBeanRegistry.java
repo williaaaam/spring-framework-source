@@ -245,6 +245,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		synchronized (this.singletonObjects) {
 			Object singletonObject = this.singletonObjects.get(beanName);
 			if (singletonObject == null) {
+				// 工厂已经在销毁阶段了，这个时候还在创建Bean的话，就直接抛出异常
 				if (this.singletonsCurrentlyInDestruction) {
 					throw new BeanCreationNotAllowedException(beanName,
 							"Singleton bean creation not allowed while singletons of this factory are in destruction " +
@@ -253,6 +254,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
+				// 在单例创建前，记录一下正在创建的单例的名称，就是把beanName放入到singletonsCurrentlyInCreation这个set集合中去!
 				beforeSingletonCreation(beanName);
 				boolean newSingleton = false;
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
@@ -260,6 +262,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					this.suppressedExceptions = new LinkedHashSet<>();
 				}
 				try {
+					// 这里调用了singletonFactory的getObject方法，对应的实现就是在doGetBean中的那一段lambda表达式
 					singletonObject = singletonFactory.getObject();
 					newSingleton = true;
 				}
@@ -283,9 +286,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					if (recordSuppressedExceptions) {
 						this.suppressedExceptions = null;
 					}
+					// 在单例完成创建后，将beanName从singletonsCurrentlyInCreation中移除
+					// 标志着这个单例已经完成了创建
 					afterSingletonCreation(beanName);
 				}
 				if (newSingleton) {
+					// 添加到单例池中国
 					addSingleton(beanName, singletonObject);
 				}
 			}
