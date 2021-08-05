@@ -6,6 +6,7 @@ import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.*;
 
+import javax.annotation.PostConstruct;
 import java.util.function.Supplier;
 
 /**
@@ -23,6 +24,7 @@ import java.util.function.Supplier;
  * <p>
  * @Configuration也是通过无参构造器创建的Bean实例
  */
+@ComponentScan
 @Configuration(proxyBeanMethods = true) // 有没有@Configuration注解，@Bean注解的方法生成的Bean都会交给Spring容器管理
 // 开启AOP自动代理
 /**
@@ -53,6 +55,11 @@ public class AppConfig {
 	public Bar bar() {
 		//System.out.println("bar  invoke foo() = " + foo());
 		return new Bar();
+	}
+
+	@PostConstruct
+	public void initMethod(){
+		System.out.println("AppConfig initMethod");
 	}
 
 }

@@ -617,7 +617,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		try {
 			// 第五步：属性注入
 			populateBean(beanName, mbd, instanceWrapper);
-			// 第六步：初始化，执行声明周期回调以及AOP
+			// 第六步：初始化，执行生命周期回调以及完成AOP代理
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -1844,12 +1844,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
-			// 第二步：完成Aware接口方法的执行,以及@PostConstructor,@PreDestroy注解的处理
+			// 第二步：完成一部分Aware接口方法的执行,以及@PostConstructor,@PreDestroy注解的处理
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
 		try {
-			// 第三步：完成初始化方法执行
+			// 第三步：完成初始化方法执行，是否实现了InitializingBean,xml中是否配置了init-method属性，
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
 		catch (Throwable ex) {

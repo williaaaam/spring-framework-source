@@ -1,9 +1,9 @@
 package com.xjz.springframework.test;
 
-import com.sun.tools.sjavac.comp.PubAPIs;
 import com.xjz.springframework.aop.v2.*;
 import com.xjz.springframework.config.AppConfig;
 import com.xjz.springframework.config.AppConfigV2;
+import com.xjz.springframework.config.bean.Country;
 import com.xjz.springframework.controller.OhMyController;
 import com.xjz.springframework.domain.Foo;
 import com.xjz.springframework.domain.Person;
@@ -29,7 +29,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -409,47 +408,6 @@ public class AppTest {
 
 	}
 
-}
-
-
-class Target {
-
-	public void targetM1(String name) {
-		System.out.println("执行Target m1方法" + name);
-	}
-
-	public void targetM2(String address) {
-		System.out.println("执行Target m2方法 " + address);
-	}
-
-}
-
-class TargetMethodInterceptor implements MethodInterceptor {
-
-	/**
-	 * @param o           代理对象: Target$$EnhancerByCGLIB$$579999@1278(CGLIB$CALLBACK_0=TargetMethodInterceptor,CGLIB$CAKKBACK_1=NoOp)
-	 * @param method      目标方法
-	 * @param objects     目标方法参数
-	 * @param methodProxy 目标方法代理 sig1=targetM1(Ljava/lang/String;)V    sig2=CGLIB$targetM1$0(Ljava/lang/String;)V
-	 * @return
-	 * @throws Throwable
-	 */
-	@Override
-	public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
-		//System.out.println("o = " + o);
-		//System.out.println("method = " + method);
-		//System.out.println("methodProxy = " + methodProxy);
-		//System.out.println("objects = " + Arrays.toString(objects));
-		System.out.println("开始执行目标对象方法");
-		Object invokeSuper = methodProxy.invokeSuper(o, objects);
-		// StackOverFlow:每次都是直接调用目标对象方法，而又被方法拦截器拦截，导致无限执行intercept方法
-		//Object invoke = methodProxy.invoke(o, objects);
-		System.out.println("结束执行目标对象方法");
-		return invokeSuper;
-
-	}
-
-
 	@DisplayName("测试api方式的AOP")
 	@Test
 	public void aop2() {
@@ -491,6 +449,56 @@ class TargetMethodInterceptor implements MethodInterceptor {
 
 	}
 
+
+
+	@DisplayName("测试Bean生命周期是怎么应用AOP的")
+	@Test
+	public void aop3(){
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+
+		//applicationContext.getBean(Country.class);
+	}
+
+
+}
+
+
+class Target {
+
+	public void targetM1(String name) {
+		System.out.println("执行Target m1方法" + name);
+	}
+
+	public void targetM2(String address) {
+		System.out.println("执行Target m2方法 " + address);
+	}
+
+}
+
+class TargetMethodInterceptor implements MethodInterceptor {
+
+	/**
+	 * @param o           代理对象: Target$$EnhancerByCGLIB$$579999@1278(CGLIB$CALLBACK_0=TargetMethodInterceptor,CGLIB$CAKKBACK_1=NoOp)
+	 * @param method      目标方法
+	 * @param objects     目标方法参数
+	 * @param methodProxy 目标方法代理 sig1=targetM1(Ljava/lang/String;)V    sig2=CGLIB$targetM1$0(Ljava/lang/String;)V
+	 * @return
+	 * @throws Throwable
+	 */
+	@Override
+	public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+		//System.out.println("o = " + o);
+		//System.out.println("method = " + method);
+		//System.out.println("methodProxy = " + methodProxy);
+		//System.out.println("objects = " + Arrays.toString(objects));
+		System.out.println("开始执行目标对象方法");
+		Object invokeSuper = methodProxy.invokeSuper(o, objects);
+		// StackOverFlow:每次都是直接调用目标对象方法，而又被方法拦截器拦截，导致无限执行intercept方法
+		//Object invoke = methodProxy.invoke(o, objects);
+		System.out.println("结束执行目标对象方法");
+		return invokeSuper;
+
+	}
 }
 
 class A {

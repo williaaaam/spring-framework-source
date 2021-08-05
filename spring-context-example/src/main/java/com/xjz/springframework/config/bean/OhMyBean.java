@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * @description
  * @date 2021/7/30
  */
-@Component
+//@Component
 public class OhMyBean {
 
 	@Autowired

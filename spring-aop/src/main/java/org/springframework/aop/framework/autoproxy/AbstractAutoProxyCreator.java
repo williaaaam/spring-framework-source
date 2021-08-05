@@ -243,7 +243,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
-	 * 这个方法会决定在后续中要不要为这个Bean产生代理对象
+	 * //  这个方法的主要目的就是在不考虑通知的情况下，确认哪些Bean不需要被代理
+	 * //  1.Advice,Advisor,Pointcut类型的Bean不需要被代理
+	 * //  2.不是原始Bean被包装过的Bean不需要被代理，例如ScopedProxyFactoryBean
+	 * //  实际上并不只是这些Bean不需要被代理，如果没有对应的通知需要被应用到这个Bean上的话
+	 * //  这个Bean也是不需要被代理的，只不过不是在这个方法中处理的。
 	 * @param beanClass the class of the bean to be instantiated
 	 * @param beanName the name of the bean
 	 * @return
@@ -252,10 +256,19 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
+		// 如果beanName为空或者为这个bean提供了定制的targetSource
 		if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
+			// advisedBeans是一个map,其中key是BeanName,value代表了这个Bean是否需要被代理
+			// 如果已经包含了这个key,不需要在进行判断了，直接返回即可
+			// 因为这个方法的目的就是在实例化前就确认哪些Bean是不需要进行AOP的
 			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
+
+			// 说明还没有对这个Bean进行处理
+			// 在这里会对SpringAOP中的基础设施bean,例如Advice,Pointcut,Advisor做标记
+			// 标志它们不需要被代理，对应的就是将其放入到advisedBeans中，value设置为false
+			// 其次，如果这个Bean不是最原始的Bean，那么也不进行代理，也将其value设置为false
 			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
 				this.advisedBeans.put(cacheKey, Boolean.FALSE);
 				return null;
@@ -265,6 +278,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		// Create proxy here if we have a custom TargetSource.
 		// Suppresses unnecessary default instantiation of the target bean:
 		// The TargetSource will handle target instances in a custom fashion.
+
+		// 是否为这个Bean提供了定制的TargetSource
+		// 如果提供了定制的TargetSource，那么直接在这一步创建一个代理对象并返回
+		// 一般不会提供
 		TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
 		if (targetSource != null) {
 			if (StringUtils.hasLength(beanName)) {
@@ -294,7 +311,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
+			// 什么时候这个判断会成立呢？
+			// 如果不出现循环引用的话，remove方法必定返回null
+			// 所以这个remove(cacheKey) != bean肯定会成立
+			// 如果发生循环依赖的话，这个判断就不会成立
+			// 这个我们在介绍循环依赖的时候再详细分析，
+			// 目前你只需要知道wrapIfNecessary完成了AOP代理
 			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
+				// 没有循环依赖 && 需要代理的话，在这里完成的代理
 				return wrapIfNecessary(bean, beanName, cacheKey);
 			}
 		}
@@ -331,28 +355,39 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @return a proxy wrapping the bean, or the raw bean instance as-is
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+
+		// 在postProcessBeforeInstantiation方法中可能已经完成过代理了
+		// 如果已经完成代理了，那么直接返回这个代理的对象
 		if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
 			return bean;
 		}
+
+		// 在postProcessBeforeInstantiation方法中可能已经将其标记为不需要代理了
+		// 这种情况下，也直接返回这个Bean
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
 			return bean;
 		}
+
+		// 跟在postProcessBeforeInstantiation方法中的逻辑一样
+		// 如果不需要代理，直接返回，同时在advisedBeans中标记成false
 		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
 			this.advisedBeans.put(cacheKey, Boolean.FALSE);
 			return bean;
 		}
 
 		// Create proxy if we have advice.
+		// 获取可以应用到这个Bean上的通知
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
+		// 如果存在通知的话，说明需要被代理
 		if (specificInterceptors != DO_NOT_PROXY) {
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
-			// 创建代理对象
+			// 创建代理对象,到这里创建代理，实际上底层就是new了一个ProxyFactory来创建代理的
 			Object proxy = createProxy(
 					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
 			this.proxyTypes.put(cacheKey, proxy.getClass());
 			return proxy;
 		}
-
+		// 如果没有通知的话，也将这个Bean标记为不需要代理
 		this.advisedBeans.put(cacheKey, Boolean.FALSE);
 		return bean;
 	}
