@@ -24,7 +24,7 @@ import java.util.function.Supplier;
  * <p>
  * @Configuration也是通过无参构造器创建的Bean实例
  */
-@ComponentScan
+@ComponentScan("com.xjz.springframework")
 @Configuration(proxyBeanMethods = true) // 有没有@Configuration注解，@Bean注解的方法生成的Bean都会交给Spring容器管理
 // 开启AOP自动代理
 /**

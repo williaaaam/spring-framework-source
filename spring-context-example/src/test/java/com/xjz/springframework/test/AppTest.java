@@ -3,7 +3,6 @@ package com.xjz.springframework.test;
 import com.xjz.springframework.aop.v2.*;
 import com.xjz.springframework.config.AppConfig;
 import com.xjz.springframework.config.AppConfigV2;
-import com.xjz.springframework.config.bean.Country;
 import com.xjz.springframework.controller.OhMyController;
 import com.xjz.springframework.domain.Foo;
 import com.xjz.springframework.domain.Person;
@@ -458,7 +457,6 @@ public class AppTest {
 
 		//applicationContext.getBean(Country.class);
 	}
-
 
 }
 
