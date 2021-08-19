@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
  */
 @Component
 @Scope(DefaultListableBeanFactory.SCOPE_PROTOTYPE)
-@DependsOn("B") // DependsOn只是保证被依赖的bean先于当前bean被实例化，被创建
+@DependsOn("b") // DependsOn只是保证被依赖的bean先于当前bean被实例化，被创建
 public class A {
 
 	/**

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * @description
  * @date 2021/7/27
  */
-@Component
+//@Component
 //@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class FooCD {
 

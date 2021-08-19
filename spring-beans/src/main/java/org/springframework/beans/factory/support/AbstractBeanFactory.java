@@ -354,7 +354,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				checkMergedBeanDefinition(mbd, beanName, args);
 
 				// Guarantee initialization of beans that the current bean depends on.
-				// @DependsOn注解标注的当前这个Bean所依赖的bean名称的集合，就是说在创建当前这个Bean前，必须要先将其依赖的Bean先完成创建
+				// @DependsOn注解标注的当前这个Bean所依赖的bean名称的集合，就是说在创建当前这个Bean前，必须要先将其依赖的Bean先完成创建（实例化）
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
 					for (String dep : dependsOn) {
@@ -379,6 +379,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (mbd.isSingleton()) {
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
+							// 1. 实例化
+							// 2. 属性装配
+							// 3. 初始化
 							return createBean(beanName, mbd, args);
 						} catch (BeansException ex) {
 							// Explicitly remove instance from singleton cache: It might have been put there
@@ -390,10 +393,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					});
 					beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
 				} else if (mbd.isPrototype()) {
+					// 创建原型实例
 					// It's a prototype -> create a new instance.
 					Object prototypeInstance = null;
 					try {
+						// 标记当前原型对象正在创建中
 						beforePrototypeCreation(beanName);
+						// 创建原型对象
 						prototypeInstance = createBean(beanName, mbd, args);
 					} finally {
 						afterPrototypeCreation(beanName);
