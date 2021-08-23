@@ -639,15 +639,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					// 将代理对象添加到一级缓存中
 					exposedObject = earlySingletonReference;
 				}
+				// 我们之前早期暴露出去的Bean和现在放到容器中的Bean不是同一个，allowRawInjectionDespiteWrapping=false,并且当前Bean被当成依赖注入到了别的Bean中
 				else if (!this.allowRawInjectionDespiteWrapping && hasDependentBean(beanName)) {
+					// 获取当前Bean所从属的Bean
 					String[] dependentBeans = getDependentBeans(beanName);
+					// 得到真实的从属Bean
 					Set<String> actualDependentBeans = new LinkedHashSet<>(dependentBeans.length);
 					for (String dependentBean : dependentBeans) {
+						// 移除仅仅为了类型检查而创建出来的
 						if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
 							actualDependentBeans.add(dependentBean);
 						}
 					}
 					if (!actualDependentBeans.isEmpty()) {
+						// 出现循环依赖，并且实际存在容器中的Bean和被注入到别的Bean中的不是同一个对象，报错！
 						throw new BeanCurrentlyInCreationException(beanName,
 								"Bean with name '" + beanName + "' has been injected into other beans [" +
 								StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +

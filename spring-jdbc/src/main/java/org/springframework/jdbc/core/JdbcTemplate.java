@@ -632,6 +632,15 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	// Methods dealing with prepared statements
 	//-------------------------------------------------------------------------
 
+	/**
+	 * execute方法封装了一次数据库访问的基本操作，例如获取连接、释放链接等
+	 * @param psc
+	 * @param action 用来执行定制化的操作
+	 * @param closeResources
+	 * @param <T>
+	 * @return
+	 * @throws DataAccessException
+	 */
 	@Nullable
 	private <T> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action, boolean closeResources)
 			throws DataAccessException {
@@ -643,16 +652,21 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			logger.debug("Executing prepared SQL statement" + (sql != null ? " [" + sql + "]" : ""));
 		}
 
+		// 1、 获取数据库连接
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
 		PreparedStatement ps = null;
 		try {
+			// 2. 创建PreparedStatement语句
 			ps = psc.createPreparedStatement(con);
 			applyStatementSettings(ps);
+			// 3. 执行回调并返回结果
 			T result = action.doInPreparedStatement(ps);
+			// 4. 处理警告
 			handleWarnings(ps);
 			return result;
 		}
 		catch (SQLException ex) {
+			// 出现异常，关闭数据库连接
 			// Release Connection early, to avoid potential connection pool deadlock
 			// in the case when the exception translator hasn't been initialized yet.
 			if (psc instanceof ParameterDisposer) {
@@ -667,6 +681,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			throw translateException("PreparedStatementCallback", sql, ex);
 		}
 		finally {
+			// 关闭资源
 			if (closeResources) {
 				if (psc instanceof ParameterDisposer) {
 					((ParameterDisposer) psc).cleanupParameters();
@@ -710,6 +725,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		logger.debug("Executing prepared SQL query");
 
+		/**
+		 * query方法完成对参数和sql语句的封装后，直接调用了execute方法
+		 * execute方法是jdbcTemplate基本的API,不管查询、更新还是保存最终都会进入这个方法中
+		 */
 		return execute(psc, new PreparedStatementCallback<T>() {
 			@Override
 			@Nullable
@@ -876,7 +895,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	@Override
 	@Nullable
 	public <T> T queryForObject(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
+
 		List<T> results = query(sql, args, new RowMapperResultSetExtractor<>(rowMapper, 1));
+		// 返回结果集中的数据少于一条或者多于一条都会报错
 		return DataAccessUtils.nullableSingleResult(results);
 	}
 

@@ -27,6 +27,7 @@ import org.springframework.scheduling.config.TaskManagementConfigUtils;
 import org.springframework.util.Assert;
 
 /**
+ * 这个类是配置类，作用是向Spring容器注册AsyncAnnotationBeanPostProcessor处理器来生成代理对象实现异步的
  * {@code @Configuration} class that registers the Spring infrastructure beans necessary
  * to enable proxy-based asynchronous method execution.
  *
@@ -46,6 +47,7 @@ public class ProxyAsyncConfiguration extends AbstractAsyncConfiguration {
 	public AsyncAnnotationBeanPostProcessor asyncAdvisor() {
 		Assert.notNull(this.enableAsync, "@EnableAsync annotation metadata was not injected");
 		AsyncAnnotationBeanPostProcessor bpp = new AsyncAnnotationBeanPostProcessor();
+		// 将通过AsyncConfigurer配置好的线程池和异常处理器设置到这个后置处理器中
 		bpp.configure(this.executor, this.exceptionHandler);
 		Class<? extends Annotation> customAsyncAnnotation = this.enableAsync.getClass("annotation");
 		if (customAsyncAnnotation != AnnotationUtils.getDefaultValue(EnableAsync.class, "annotation")) {
