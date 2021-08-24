@@ -3,6 +3,7 @@ package com.xjz.springframework.test;
 import com.xjz.springframework.aop.v2.*;
 import com.xjz.springframework.config.AppConfig;
 import com.xjz.springframework.config.AppConfigV2;
+import com.xjz.springframework.config.AppConfigV4;
 import com.xjz.springframework.controller.OhMyController;
 import com.xjz.springframework.domain.Foo;
 import com.xjz.springframework.domain.Person;
@@ -25,6 +26,7 @@ import org.springframework.cglib.proxy.*;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -263,6 +265,18 @@ public class AppTest {
 	}
 
 
+	@Test
+	public void testAsyncAnnotation() {
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+		applicationContext.register(AppConfigV4.class);
+		applicationContext.refresh();
+
+		com.xjz.springframework.bc.A bean = applicationContext.getBean(com.xjz.springframework.bc.A.class);
+		bean.async();
+		System.out.println("主线程执行完毕");
+	}
+
+
 	@DisplayName("Spring对象协作的几种方式")
 	@Test
 	public void beanCollaborator() {
@@ -449,10 +463,9 @@ public class AppTest {
 	}
 
 
-
 	@DisplayName("测试Bean生命周期是怎么应用AOP的")
 	@Test
-	public void aop3(){
+	public void aop3() {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
 
 		//applicationContext.getBean(Country.class);

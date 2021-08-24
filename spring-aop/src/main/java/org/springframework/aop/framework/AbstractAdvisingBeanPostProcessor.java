@@ -64,25 +64,33 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
+		// 没有通知，或者是AOP的基础设施类，那么不进行代理
 		if (this.advisor == null || bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
 		}
-
+		/**
+		 * // 对已经被代理的类，不再生成代理，只是将通知添加到代理类的逻辑中
+		 *     // 这里通过beforeExistingAdvisors决定是将通知添加到所有通知之前还是添加到所有通知之后
+		 *     // 在使用@Async注解的时候，beforeExistingAdvisors被设置成了true
+		 *     // 意味着整个方法及其拦截逻辑都会异步执行
+		 * ————————————————
+		 * 版权声明：本文为CSDN博主「程序员DMZ」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+		 * 原文链接：https://blog.csdn.net/qq_41907991/article/details/107500036
+		 */
 		if (bean instanceof Advised) {
 			Advised advised = (Advised) bean;
 			if (!advised.isFrozen() && isEligible(AopUtils.getTargetClass(bean))) {
 				// Add our local Advisor to the existing proxy's Advisor chain...
 				if (this.beforeExistingAdvisors) {
 					advised.addAdvisor(0, this.advisor);
-				}
-				else {
+				} else {
 					advised.addAdvisor(this.advisor);
 				}
 				return bean;
 			}
 		}
-
+		// 判断需要对哪些Bean进行代理
 		if (isEligible(bean, beanName)) {
 			ProxyFactory proxyFactory = prepareProxyFactory(bean, beanName);
 			if (!proxyFactory.isProxyTargetClass()) {
@@ -114,7 +122,8 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 	 * For the latter, {@link #isEligible(Class)} is being called directly,
 	 * with the actual target class behind the existing proxy (as determined
 	 * by {@link AopUtils#getTargetClass(Object)}).
-	 * @param bean the bean instance
+	 *
+	 * @param bean     the bean instance
 	 * @param beanName the name of the bean
 	 * @see #isEligible(Class)
 	 */
@@ -126,6 +135,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 	 * Check whether the given class is eligible for advising with this
 	 * post-processor's {@link Advisor}.
 	 * <p>Implements caching of {@code canApply} results per bean target class.
+	 *
 	 * @param targetClass the class to check against
 	 * @see AopUtils#canApply(Advisor, Class)
 	 */
@@ -149,12 +159,13 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 	 * of interfaces for non-target-class proxies and the configured advisor
 	 * will be applied afterwards; {@link #customizeProxyFactory} allows for
 	 * late customizations of those parts right before proxy creation.
-	 * @param bean the bean instance to create a proxy for
+	 *
+	 * @param bean     the bean instance to create a proxy for
 	 * @param beanName the corresponding bean name
 	 * @return the ProxyFactory, initialized with this processor's
 	 * {@link ProxyConfig} settings and the specified bean
-	 * @since 4.2.3
 	 * @see #customizeProxyFactory
+	 * @since 4.2.3
 	 */
 	protected ProxyFactory prepareProxyFactory(Object bean, String beanName) {
 		ProxyFactory proxyFactory = new ProxyFactory();
@@ -167,11 +178,12 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 	 * Subclasses may choose to implement this: for example,
 	 * to change the interfaces exposed.
 	 * <p>The default implementation is empty.
+	 *
 	 * @param proxyFactory the ProxyFactory that is already configured with
-	 * target, advisor and interfaces and will be used to create the proxy
-	 * immediately after this method returns
-	 * @since 4.2.3
+	 *                     target, advisor and interfaces and will be used to create the proxy
+	 *                     immediately after this method returns
 	 * @see #prepareProxyFactory
+	 * @since 4.2.3
 	 */
 	protected void customizeProxyFactory(ProxyFactory proxyFactory) {
 	}

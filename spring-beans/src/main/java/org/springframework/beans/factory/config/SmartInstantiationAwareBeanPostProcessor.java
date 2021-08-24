@@ -53,6 +53,7 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	}
 
 	/**
+	 * 推断所有符合要求的构造函数，在实例化对象的时候我们就需要明确到底使用哪个构造函数
 	 * // Spring使用这个方法完成了构造函数的推断
 	 * Determine the candidate constructors to use for the given bean.
 	 * <p>The default implementation returns {@code null}.
@@ -69,6 +70,7 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	}
 
 	/**
+	 * 获取提前暴露的对象，用于解决循环依赖
 	 * 主要为了解决循环依赖，Spring内部使用这个方法主要是为了让早期曝光的对象成为一个“合格”的对象
 	 * Obtain a reference for early access to the specified bean,
 	 * typically for the purpose of resolving a circular reference.
