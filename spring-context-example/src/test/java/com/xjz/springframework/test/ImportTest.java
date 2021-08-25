@@ -20,6 +20,7 @@ public class ImportTest {
 	public void importStudent() {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfigV5.class);
 		Student bean = applicationContext.getBean(Student.class);
+		// student =  Student{name='Michael'}
 		System.out.println("student =  " + bean);
 	}
 

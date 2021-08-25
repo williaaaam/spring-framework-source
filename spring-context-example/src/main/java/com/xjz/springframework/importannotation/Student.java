@@ -7,8 +7,20 @@ package com.xjz.springframework.importannotation;
  */
 public class Student {
 
+	private String name;
+
+	public Student(String name) {
+		this.name = name;
+	}
+
 	public Student() {
 		System.out.println("Student 无参构造器初始化");
 	}
 
+	@Override
+	public String toString() {
+		return "Student{" +
+				"name='" + name + '\'' +
+				'}';
+	}
 }

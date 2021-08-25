@@ -146,14 +146,18 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
+		// 对Import完成的，加载其Import的BeanDefinition
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
+			//加载@Bean注解的方法生成的Bean的Definition
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 
+		//@ImportResource 注解加载的
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+		// 加载ImportBeanDefinitionRegistrar加载的Bean的Definition
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 

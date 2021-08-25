@@ -11,7 +11,7 @@ import org.springframework.core.type.AnnotationMetadata;
 public class OhMyImportSelector implements ImportSelector {
 
 	/**
-	 * 需要导入的组件的全类名数组
+	 * ConfigurationClassParser 609行执行该方法；需要导入的组件的全类名数组
 	 *
 	 * @param importingClassMetadata StandardAnnotationMetadata  AnnotationMetadata是Import注解所在的类属性（如果所在类是注解类，则延伸至应用这个注解类的非注解类为止）
 	 * @return

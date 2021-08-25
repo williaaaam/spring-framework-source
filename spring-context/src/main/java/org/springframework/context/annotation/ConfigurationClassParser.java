@@ -334,7 +334,7 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// Process any @Import annotations
+		// Process any @Import annotations ,检查是否有循环依赖
 		processImports(configClass, sourceClass, getImports(sourceClass), filter, true);
 
 		// Process any @ImportResource annotations
@@ -542,11 +542,13 @@ class ConfigurationClassParser {
 
 
 	/**
+	 *
 	 * Returns {@code @Import} class, considering all meta-annotations.
 	 */
 	private Set<SourceClass> getImports(SourceClass sourceClass) throws IOException {
 		Set<SourceClass> imports = new LinkedHashSet<>();
 		Set<SourceClass> visited = new LinkedHashSet<>();
+		// 递归查询所有注解以及注解的注解是否包含@Import
 		collectImports(sourceClass, imports, visited);
 		return imports;
 	}
@@ -567,6 +569,7 @@ class ConfigurationClassParser {
 	private void collectImports(SourceClass sourceClass, Set<SourceClass> imports, Set<SourceClass> visited)
 			throws IOException {
 
+		//记录是否已经扫描过这个类，如果扫描过就不重复添加，防止重复或者死循环
 		if (visited.add(sourceClass)) {
 			for (SourceClass annotation : sourceClass.getAnnotations()) {
 				String annName = annotation.getMetadata().getClassName();
@@ -574,18 +577,21 @@ class ConfigurationClassParser {
 					collectImports(annotation, imports, visited);
 				}
 			}
+			//添加@Import注解里面的所有配置类
 			imports.addAll(sourceClass.getAnnotationAttributes(Import.class.getName(), "value"));
 		}
 	}
 
+	//在解析时，入栈，解析结束后，出栈，通过检查栈中是否有当前类，判断是否有循环依赖
 	private void processImports(ConfigurationClass configClass, SourceClass currentSourceClass,
 			Collection<SourceClass> importCandidates, Predicate<String> exclusionFilter,
 			boolean checkForCircularImports) {
-
+		// importCandidates，例如OhMyImportSelector，AppConfigV4,E
 		if (importCandidates.isEmpty()) {
 			return;
 		}
 
+		//通过importStack检查循环依赖
 		if (checkForCircularImports && isChainedImportOnStack(configClass)) {
 			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
 		}
@@ -623,6 +629,8 @@ class ConfigurationClassParser {
 					else {
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
 						// process it as an @Configuration class
+						//处理@Configuration注解类，或者是普通类（直接生成Bean）
+						//在栈加上这个类
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
 						processConfigurationClass(candidate.asConfigClass(configClass), exclusionFilter);
@@ -729,7 +737,7 @@ class ConfigurationClassParser {
 	private static class ImportStack extends ArrayDeque<ConfigurationClass> implements ImportRegistry {
 
 		private final MultiValueMap<String, AnnotationMetadata> imports = new LinkedMultiValueMap<>();
-
+		// 例如 importingClass=AppConfigV5,importedClass=AppConfigV4
 		public void registerImport(AnnotationMetadata importingClass, String importedClass) {
 			this.imports.add(importedClass, importingClass);
 		}

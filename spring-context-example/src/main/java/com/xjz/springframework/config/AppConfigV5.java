@@ -12,8 +12,9 @@ import org.springframework.context.annotation.Import;
 @Configuration
 // Import注解将Java对象注册到Spring容器中
 //@Import(Student.class)
-//@Import(OhMySelector.class)
+@Import(OhMyImportSelector.class)
 //@Import({OhMyImportSelector.class, AppConfigV4.class})
-@EnableAppConfigV6("AppConfigV6")
+//@EnableAppConfigV6(name = "AppConfigV6")
+//@Import(OhMyImportBeanDefinitionRegistrar.class)
 public class AppConfigV5 {
 }
