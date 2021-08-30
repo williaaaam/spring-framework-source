@@ -1,0 +1,3 @@
+com.xjz.springframework.importannotation.EnableAppConfigV6=\
+  com.xjz.springframework.importannotation.OhMyAutoConfig,\
+  com.xjz.springframework.importannotation.OhMyAutoConfig2
