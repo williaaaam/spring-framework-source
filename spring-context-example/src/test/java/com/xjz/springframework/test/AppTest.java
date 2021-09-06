@@ -4,6 +4,7 @@ import com.xjz.springframework.aop.v2.*;
 import com.xjz.springframework.config.AppConfig;
 import com.xjz.springframework.config.AppConfigV2;
 import com.xjz.springframework.config.AppConfigV4;
+import com.xjz.springframework.config.AppConfigV7;
 import com.xjz.springframework.controller.OhMyController;
 import com.xjz.springframework.domain.Foo;
 import com.xjz.springframework.domain.Person;
@@ -26,7 +27,6 @@ import org.springframework.cglib.proxy.*;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -469,6 +469,16 @@ public class AppTest {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
 
 		//applicationContext.getBean(Country.class);
+	}
+
+
+	/**
+	 * @Autowired注解的属性在@Bean方法执行前就会完成注入
+	 */
+	@DisplayName("测试@Autowired和Bean 顺序")
+	@Test
+	public void autowiredAndBean() {
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfigV7.class);
 	}
 
 }
