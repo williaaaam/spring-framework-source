@@ -529,7 +529,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					//获取当前方法的属性描述符，即方法是可读的(readable)getter方法，还是可写的(writeable)setter方法
 					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 					//将方法元信息封装添加到返回的元信息集合中
-					currElements.add(new AutowiredMethodElement(method, required, pd))
+					currElements.add(new AutowiredMethodElement(method, required, pd));
 				}
 			});
 
