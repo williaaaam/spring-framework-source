@@ -193,7 +193,7 @@ public abstract class AnnotationConfigUtils {
 		}
 
 		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
-		// 注册CommonAnnotationBeanPostProcessor：工作于依赖注入阶段，专门用于处理@Inject注解
+		// 注册CommonAnnotationBeanPostProcessor：工作于依赖注入阶段，处理@Resource, @PreDestroy, @PostConstruct注解
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);

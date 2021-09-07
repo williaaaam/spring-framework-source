@@ -112,10 +112,12 @@ public class InjectionMetadata {
 
 	public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
 		Collection<InjectedElement> checkedElements = this.checkedElements;
+		// 要注入的字段集合
 		Collection<InjectedElement> elementsToIterate =
 				(checkedElements != null ? checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
 			for (InjectedElement element : elementsToIterate) {
+				// 遍历每个字段 注入
 				element.inject(target, beanName, pvs);
 			}
 		}
@@ -217,6 +219,7 @@ public class InjectionMetadata {
 		}
 
 		/**
+		 * 自动字段和方法注入
 		 * Either this or {@link #getResourceToInject} needs to be overridden.
 		 */
 		protected void inject(Object target, @Nullable String requestingBeanName, @Nullable PropertyValues pvs)
