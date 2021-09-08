@@ -1415,7 +1415,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 			//如果符合该类型的Bean有多个
 			if (matchingBeans.size() > 1) {
-				//挑选出最优解
+				// 挑选出最优解
 				autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 				if (autowiredBeanName == null) {
 					if (isRequired(descriptor) || !indicatesMultipleBeans(type)) {
@@ -1785,6 +1785,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				Integer candidatePriority = getPriority(beanInstance);
 				if (candidatePriority != null) {
 					if (highestPriorityBeanName != null) {
+						// 不能同时存在两个最高优先级的序号
 						if (candidatePriority.equals(highestPriority)) {
 							throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
 									"Multiple beans found with the same priority ('" + highestPriority +
@@ -1794,6 +1795,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							highestPriority = candidatePriority;
 						}
 					} else {
+						//使用优先级序号最小的Bean作为最优解
 						highestPriorityBeanName = candidateBeanName;
 						highestPriority = candidatePriority;
 					}

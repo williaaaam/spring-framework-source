@@ -20,6 +20,7 @@ public class AutowiredC {
 	@Qualifier("autowiredA")
 	IAutowired autowired;*/
 
+	@Autowired
 	private IAutowired autowiredA;
 
 	private IAutowired autowiredB;
@@ -34,15 +35,21 @@ public class AutowiredC {
 		System.out.println("执行了AutowiredC(#)构造器");
 	}*/
 
-	public AutowiredC(IAutowired autowiredA, IAutowired autowiredB) {
+	/*public AutowiredC(IAutowired autowiredA, IAutowired autowiredB) {
 		this.autowiredA = autowiredA;
 		this.autowiredB = autowiredB;
 		System.out.println("执行了AutowiredC(#,#)构造器");
+	}*/
+
+	@Autowired
+	public void setAutowiredB(String nane) {
+		//this.autowiredB = autowiredB;
 	}
 
 	@PostConstruct
 	public void init() {
-		System.out.println("autowired = " + autowiredA);
+		System.out.println("autowiredA = " + autowiredA);
+		System.out.println("autowiredB = " + autowiredB);
 	}
 
 	@PreDestroy

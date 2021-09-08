@@ -478,7 +478,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						// metadata targetClass != clazz
 						metadata.clear(pvs);
 					}
-					//解析给定类autowire相关注解元信息;    // 构建一个需要注入的元信息对象
+					//解析给定类相关注解元信息;    // 构建一个需要注入的元信息对象
 					metadata = buildAutowiringMetadata(clazz);
 					//将得到的给定类autowire相关注解元信息存储在容器缓存中
 					this.injectionMetadataCache.put(cacheKey, metadata);
@@ -504,7 +504,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 			// 利用JDK反射机制获取给定类中所有的声明字段，获取字段上的注解信息
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
-				// 获取给定字段上的注解
+				// 获取给定字段上的注解:@Autowired. @Value或者@Inject注解
 				MergedAnnotation<?> ann = findAutowiredAnnotation(field);
 				if (ann != null) {
 					// 如果给定字段是静态的(static)，则直接遍历下一个字段：@Autowire不支持静态字段注入
@@ -539,6 +539,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						return;
 					}
 					// 如果方法的参数列表为空,提示：@Autowire 注解只能用在有参数的方法上
+					//@Autowired注解标识在方法上的目的就是将容器内的Bean注入到方法的参数中，没有参数就违背了初衷
 					if (method.getParameterCount() == 0) {
 						if (logger.isInfoEnabled()) {
 							logger.info("Autowired annotation should only be used on methods with parameters: " +
@@ -681,6 +682,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			if (this.cached) {
 				try {
 					//从缓存中获取字段值value
+					//如果@Autowired标识的属性有一个合适的待注入对象，则缓存这个Bean的名称，
+					//如果再次生成这个Bean时，就不需要重新按类型去搜索Spring容器，直接获取这个缓存Bean的名称
 					value = resolvedCachedArgument(beanName, this.cachedFieldValue);
 				} catch (NoSuchBeanDefinitionException ex) {
 					// Unexpected removal of target bean for cached argument -> re-resolve
@@ -708,6 +711,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			Object value;
 			try {
 				//获取注入的值
+				//如果@Autowired标识的属性有一个合适的待注入对象，则缓存这个Bean的名称，
+				//如果再次生成这个Bean时，就不需要重新按类型去搜索Spring容器，直接获取这个缓存Bean的名称
 				value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
 			} catch (BeansException ex) {
 				throw new UnsatisfiedDependencyException(null, beanName, new InjectionPoint(field), ex);
