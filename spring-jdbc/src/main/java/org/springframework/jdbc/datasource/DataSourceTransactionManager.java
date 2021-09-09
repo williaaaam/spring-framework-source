@@ -310,6 +310,12 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 	}
 
+	/**
+	 * 数据库本身是不支持事务挂起的；那么Spring是如何实现把事务挂起的呢？
+	 * :这里是把已有事务的connection解除，并返回被挂起的资源。在接下来开启事务时，会将该挂起资源一并传入，这样当内层事务执行完成后，可以继续执行外层被挂起的事务。
+	 * @param transaction the transaction object returned by {@code doGetTransaction}
+	 * @return
+	 */
 	@Override
 	protected Object doSuspend(Object transaction) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;

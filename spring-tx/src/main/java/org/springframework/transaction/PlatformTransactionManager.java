@@ -19,6 +19,7 @@ package org.springframework.transaction;
 import org.springframework.lang.Nullable;
 
 /**
+ * 真正提交、回滚
  * This is the central interface in Spring's imperative transaction infrastructure.
  * Applications can use this directly, but it is not primarily meant as an API:
  * Typically, applications will work with either TransactionTemplate or

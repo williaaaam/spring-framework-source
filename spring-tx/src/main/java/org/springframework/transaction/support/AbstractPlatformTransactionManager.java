@@ -37,6 +37,7 @@ import org.springframework.transaction.TransactionSuspensionNotSupportedExceptio
 import org.springframework.transaction.UnexpectedRollbackException;
 
 /**
+ * 事务的流程，虽然是由TransactionAspectSupport实现的，但是真正的提交，回滚，是由AbstractPlatformTransactionManager来完成
  * Abstract base class that implements Spring's standard transaction workflow,
  * serving as basis for concrete platform transaction managers like
  * {@link org.springframework.transaction.jta.JtaTransactionManager}.
@@ -389,6 +390,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
+	 * 开启一个新的事务
 	 * Start a new transaction.
 	 */
 	private TransactionStatus startTransaction(TransactionDefinition definition, Object transaction,
@@ -403,6 +405,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
+	 * 实现事务传播逻辑
 	 * Create a TransactionStatus for an existing transaction.
 	 */
 	private TransactionStatus handleExistingTransaction(
@@ -410,11 +413,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			throws TransactionException {
 
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) {
+			// 1. 当前存在事务，则直接抛异常
 			throw new IllegalTransactionStateException(
 					"Existing transaction found for transaction marked with propagation 'never'");
 		}
 
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
+			// 2. 非事务下执行，如果当前存在事务，则挂起当前事务
 			if (debugEnabled) {
 				logger.debug("Suspending current transaction");
 			}
@@ -429,8 +434,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Suspending current transaction, creating new transaction with name [" +
 						definition.getName() + "]");
 			}
+			// 3. 挂起当前事务，并创建新事务
 			SuspendedResourcesHolder suspendedResources = suspend(transaction);
 			try {
+				// 接下来开启事务时，会将挂起资源一起传入
 				return startTransaction(definition, transaction, debugEnabled, suspendedResources);
 			}
 			catch (RuntimeException | Error beginEx) {
@@ -440,6 +447,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
+			// 4.
 			if (!isNestedTransactionAllowed()) {
 				throw new NestedTransactionNotSupportedException(
 						"Transaction manager does not allow nested transactions by default - " +
@@ -581,6 +589,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(null);
 				boolean wasActive = TransactionSynchronizationManager.isActualTransactionActive();
 				TransactionSynchronizationManager.setActualTransactionActive(false);
+				// 在接下来开启事务时，会将该挂起资源一并传入，这样当内层事务执行完成后，可以继续执行外层被挂起的事务
 				return new SuspendedResourcesHolder(
 						suspendedResources, suspendedSynchronizations, name, readOnly, isolationLevel, wasActive);
 			}
@@ -991,11 +1000,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		if (status.isNewTransaction()) {
 			doCleanupAfterCompletion(status.getTransaction());
 		}
+		// 有挂起事务则获取挂起的资源，继续执行
 		if (status.getSuspendedResources() != null) {
 			if (status.isDebug()) {
 				logger.debug("Resuming suspended transaction after completion of inner transaction");
 			}
 			Object transaction = (status.hasTransaction() ? status.getTransaction() : null);
+			// 恢复挂起事务的执行
 			resume(transaction, (SuspendedResourcesHolder) status.getSuspendedResources());
 		}
 	}
