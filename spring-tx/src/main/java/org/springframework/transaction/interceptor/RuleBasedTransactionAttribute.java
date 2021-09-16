@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.lang.Nullable;
 
 /**
+ * @Transactional注解的rollbackFor等属性就会被封装到这个类中，允许程序员自己定义回滚的异常，如果没有指定回滚的异常，默认抛出RuntimeException/Error才进行回滚
  * TransactionAttribute implementation that works out whether a given exception
  * should cause transaction rollback by applying a number of rollback rules,
  * both positive and negative. If no custom rollback rules apply, this attribute

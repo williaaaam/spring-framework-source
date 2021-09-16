@@ -37,7 +37,8 @@ import org.springframework.transaction.TransactionSuspensionNotSupportedExceptio
 import org.springframework.transaction.UnexpectedRollbackException;
 
 /**
- * 事务的流程，虽然是由TransactionAspectSupport实现的，但是真正的提交，回滚，是由AbstractPlatformTransactionManager来完成
+ * 事务的流程，虽然是由TransactionAspectSupport实现的，但是真正的提交，回滚，是由AbstractPlatformTransactionManager来完成；
+ * 主要用作事务管理的模板，这个抽象类已经实现了事务的传播行为以及跟事务相关的同步管理
  * Abstract base class that implements Spring's standard transaction workflow,
  * serving as basis for concrete platform transaction managers like
  * {@link org.springframework.transaction.jta.JtaTransactionManager}.

@@ -31,6 +31,7 @@ import org.springframework.transaction.NoTransactionException;
 import org.springframework.util.Assert;
 
 /**
+ *
  * Central delegate that manages resources and transaction synchronizations per
  * subscriber context.
  * To be used by resource management code but not by typical application code.

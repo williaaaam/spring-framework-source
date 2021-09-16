@@ -163,6 +163,10 @@ public abstract class AbstractFallbackTransactionAttributeSource
 	 */
 	@Nullable
 	protected TransactionAttribute computeTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
+		/**
+		 * 只有 @Transactional 注解应用到 public 方法上才能进行事务管理。
+		 * 这是因为 Spring 在 AOP 事务注解时，在读取注解上的属性方法中，会优先判断方法是否是 public，如果不是 public，就不会读取事务配置信息。
+		 */
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;

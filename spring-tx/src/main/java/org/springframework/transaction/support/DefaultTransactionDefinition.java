@@ -52,12 +52,22 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	/** Constants instance for TransactionDefinition. */
 	static final Constants constants = new Constants(TransactionDefinition.class);
 
+	// 默认事务传播机制为：如果当前不存在事务，则非事务运行；否则加入当前事务
 	private int propagationBehavior = PROPAGATION_REQUIRED;
 
+	/**
+	 * 隔离级别和数据库默认隔离级别保持一致
+	 */
 	private int isolationLevel = ISOLATION_DEFAULT;
 
+	/**
+	 * 默认为-1，不设置超时时间
+	 */
 	private int timeout = TIMEOUT_DEFAULT;
 
+	/**
+	 * 默认不是只读
+	 */
 	private boolean readOnly = false;
 
 	@Nullable

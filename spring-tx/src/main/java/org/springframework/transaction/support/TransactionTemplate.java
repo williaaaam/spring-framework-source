@@ -31,6 +31,11 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.util.Assert;
 
 /**
+ * 1. TransactionTemplate简化编程式事务分类和异常处理
+ * 2. 可以通过TransactionTemplate指定事务的属性，例如隔离级别、超时时间、传播行为等等
+ * 3. 实际上TransactionTemplate内部也是使用TransactionManager来完成事务管理的
+ * TransactionTemplate是线程安全的，我们可以全局配置一个TransactionTemplate，然后所有的类都共享这个TransactionTemplate。但是，如果某个类需要特殊的事务配置，例如需要定制隔离级别，那么我们就有必要去创建不同的TransactionTemplate。
+
  * Template class that simplifies programmatic transaction demarcation and
  * transaction exception handling.
  *
@@ -134,21 +139,26 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);
 		}
 		else {
+			// 1. 通过事务管理器开启事务
 			TransactionStatus status = this.transactionManager.getTransaction(this);
 			T result;
 			try {
+				// 2. 执行业务逻辑
 				result = action.doInTransaction(status);
 			}
 			catch (RuntimeException | Error ex) {
 				// Transactional code threw application exception -> rollback
+				// 3. 出现异常，进行回滚
 				rollbackOnException(status, ex);
 				throw ex;
 			}
 			catch (Throwable ex) {
 				// Transactional code threw unexpected exception -> rollback
+				// 3. 出现异常，进行回滚
 				rollbackOnException(status, ex);
 				throw new UndeclaredThrowableException(ex, "TransactionCallback threw undeclared checked exception");
 			}
+			// 4. 正常执行事务的话，提交事务
 			this.transactionManager.commit(status);
 			return result;
 		}

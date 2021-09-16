@@ -44,13 +44,17 @@ import org.springframework.core.Ordered;
  */
 public interface TransactionSynchronization extends Ordered, Flushable {
 
-	/** Completion status in case of proper commit. */
+	/** 提交
+	 * Completion status in case of proper commit. */
 	int STATUS_COMMITTED = 0;
 
-	/** Completion status in case of proper rollback. */
+	/** 回滚
+	 * Completion status in case of proper rollback. */
 	int STATUS_ROLLED_BACK = 1;
 
-	/** Completion status in case of heuristic mixed completion or system errors. */
+	/**
+	 * 异常
+	 *  Completion status in case of heuristic mixed completion or system errors. */
 	int STATUS_UNKNOWN = 2;
 
 
@@ -64,6 +68,7 @@ public interface TransactionSynchronization extends Ordered, Flushable {
 	}
 
 	/**
+	 * 如果事务挂起，我们需要将其挂起
 	 * Suspend this synchronization.
 	 * Supposed to unbind resources from TransactionSynchronizationManager if managing any.
 	 * @see TransactionSynchronizationManager#unbindResource

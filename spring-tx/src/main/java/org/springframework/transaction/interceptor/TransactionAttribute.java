@@ -36,6 +36,7 @@ import org.springframework.transaction.TransactionDefinition;
 public interface TransactionAttribute extends TransactionDefinition {
 
 	/**
+	 * 用于指定事务使用的事务管理器的名称
 	 * Return a qualifier value associated with this transaction attribute.
 	 * <p>This may be used for choosing a corresponding transaction manager
 	 * to process this specific transaction.
@@ -53,6 +54,7 @@ public interface TransactionAttribute extends TransactionDefinition {
 	Collection<String> getLabels();
 
 	/**
+	 * 指定在出现哪种异常时才进行回滚
 	 * Should we roll back on the given exception?
 	 * @param ex the exception to evaluate
 	 * @return whether to perform a rollback or not
