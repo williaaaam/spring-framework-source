@@ -323,6 +323,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 
 	/**
+	 *
+	 * 获取@Transactional注解事务属性------->tas.getTransactionAttribute
+	 * 创建事务------------->createTransactionIfNecessary
+	 * 执行业务逻辑------->invocation.proceedWithInvocation
+	 * 异常时完成事务---->completeTransactionAfterThrowing
+	 * 重置线程中绑定的事务信息----->cleanupTransactionInfo
+	 * 提交事务------------->commitTransactionAfterReturning
+	 * ————————————————
+	 * 版权声明：本文为CSDN博主「程序员DMZ」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+	 * 原文链接：https://blog.csdn.net/qq_41907991/article/details/108052314
 	 * General delegate for around-advice-based subclasses, delegating to several other template
 	 * methods on this class. Able to handle {@link CallbackPreferringPlatformTransactionManager}
 	 * as well as regular {@link PlatformTransactionManager} implementations and
@@ -338,8 +348,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			final InvocationCallback invocation) throws Throwable {
 
 		// If the transaction attribute is null, the method is non-transactional.
+		// 之前在配置类中注册了一个AnnotationTransactionAttributeSource
+		// 这里就是直接返回了之前注册的那个Bean，通过它去获取事务属性（解析@Transactional注解）
 		TransactionAttributeSource tas = getTransactionAttributeSource();
+		// 解析@Transactional注解获取事务属性
 		final TransactionAttribute txAttr = (tas != null ? tas.getTransactionAttribute(method, targetClass) : null);
+		// 获取对应的事务管理器
 		final TransactionManager tm = determineTransactionManager(txAttr);
 
 		if (this.reactiveAdapterRegistry != null && tm instanceof ReactiveTransactionManager) {
@@ -375,7 +389,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			return result;
 		}
 
+		// 做了个强转PlatformTransactionManager
 		PlatformTransactionManager ptm = asPlatformTransactionManager(tm);
+		// 切点名称（类名+方法名）,会被作为事务的名称
 		final String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
 		if (txAttr == null || !(ptm instanceof CallbackPreferringPlatformTransactionManager)) {
@@ -388,15 +404,18 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				// This is an around advice: Invoke the next interceptor in the chain.
 				// This will normally result in a target object being invoked.
 				// 执行方法
+				// 这里执行真正的业务逻辑
 				retVal = invocation.proceedWithInvocation();
 			}
 			catch (Throwable ex) {
 				// target invocation exception
 				// 捕获异常时的处理
+				// 方法执行出现异常，在异常情况下完成事务
 				completeTransactionAfterThrowing(txInfo, ex);
 				throw ex;
 			}
 			finally {
+				// 重置线程中的事务信息
 				cleanupTransactionInfo(txInfo);
 			}
 
@@ -585,6 +604,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			@Nullable TransactionAttribute txAttr, final String joinpointIdentification) {
 
 		// If no name specified, apply method identification as transaction name.
+		// 如果没有为事务指定名称，使用切点作为事务(类名+方法名)名称
 		if (txAttr != null && txAttr.getName() == null) {
 			txAttr = new DelegatingTransactionAttribute(txAttr) {
 				@Override
@@ -597,6 +617,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		TransactionStatus status = null;
 		if (txAttr != null) {
 			if (tm != null) {
+				// 调用事务管理器的方法，开启事务，获取一个事务并返回事务的状态
 				status = tm.getTransaction(txAttr);
 			}
 			else {
@@ -606,6 +627,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 			}
 		}
+
+		// 将事务相关信息封装到TransactionInfo对象中
+		// 并将TransactionInfo绑定到当前线程
 		return prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
 	}
 
@@ -621,6 +645,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			@Nullable TransactionAttribute txAttr, String joinpointIdentification,
 			@Nullable TransactionStatus status) {
 
+		/**
+		 * 事务信息包括事务管理器、事务属性和连接点名称
+		 */
 		TransactionInfo txInfo = new TransactionInfo(tm, txAttr, joinpointIdentification);
 		if (txAttr != null) {
 			// We need a transaction for this method...
@@ -718,6 +745,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 
 	/**
+	 * 一个TransactionInfo对象包含了事务相关的所有信息，
+	 * 例如实现事务使用的事务管理器（PlatformTransactionManager），
+	 * 事务的属性（TransactionAttribute），
+	 * 事务的状态（transactionStatus）
+	 * 以及与当前创建的关联的上一个事务信息（oldTransactionInfo）
 	 * Opaque object used to hold transaction information. Subclasses
 	 * must pass it back to methods on this class, but not see its internals.
 	 */
@@ -773,6 +805,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		}
 
 		/**
+		 * 判断是否真正创建了一个事务
 		 * Return whether a transaction was created by this aspect,
 		 * or whether we just have a placeholder to keep ThreadLocal stack integrity.
 		 */

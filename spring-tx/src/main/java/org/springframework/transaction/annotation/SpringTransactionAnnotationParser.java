@@ -65,7 +65,14 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 		return parseTransactionAnnotation(AnnotationUtils.getAnnotationAttributes(ann, false, false));
 	}
 
+	/**
+	 * 解析了@Transactional注解，并将这个注解的属性封装到了一个RuleBasedTransactionAttribute对象中返回
+	 * @param attributes
+	 * @return
+	 */
 	protected TransactionAttribute parseTransactionAnnotation(AnnotationAttributes attributes) {
+		// 最终返回的是一个RuleBasedTransactionAttribute
+		// 在上篇文章分析过了，定义了在出现异常时如何回滚
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 
 		Propagation propagation = attributes.getEnum("propagation");

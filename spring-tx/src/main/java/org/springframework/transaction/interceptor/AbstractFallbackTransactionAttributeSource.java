@@ -92,6 +92,13 @@ public abstract class AbstractFallbackTransactionAttributeSource
 
 
 	/**
+	 * // 获取事务对应的属性,实际上返回一个AnnotationTransactionAttributeSource
+	 * // 之后再调用AnnotationTransactionAttributeSource的getTransactionAttribute
+	 * // getTransactionAttribute:先从拦截的方法上找@Transactional注解
+	 * // 如果方法上没有的话，再从方法所在的类上找，如果类上还没有的话尝试从接口或者父类上找
+	 * ————————————————
+	 * 版权声明：本文为CSDN博主「程序员DMZ」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+	 * 原文链接：https://blog.csdn.net/qq_41907991/article/details/108052314
 	 * Determine the transaction attribute for this method invocation.
 	 * <p>Defaults to the class's transaction attribute if no method attribute is found.
 	 * @param method the method for the current invocation (never {@code null})
@@ -107,6 +114,8 @@ public abstract class AbstractFallbackTransactionAttributeSource
 		}
 
 		// First, see if we have a cached value.
+		// 在缓存中查找
+		// cacheKey = MethodClassKey
 		Object cacheKey = getCacheKey(method, targetClass);
 		TransactionAttribute cached = this.attributeCache.get(cacheKey);
 		if (cached != null) {
@@ -121,12 +130,16 @@ public abstract class AbstractFallbackTransactionAttributeSource
 		}
 		else {
 			// We need to work it out.
+			// 这里真正的去执行解析注解@Transactional
 			TransactionAttribute txAttr = computeTransactionAttribute(method, targetClass);
 			// Put it in the cache.
+			// 缓存解析的结果，如果为事务属性为null,也放入一个标志
+			// 代表这个方法不需要进行事务管理
 			if (txAttr == null) {
 				this.attributeCache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
 			}
 			else {
+				// 类名+方法名
 				String methodIdentification = ClassUtils.getQualifiedMethodName(method, targetClass);
 				if (txAttr instanceof DefaultTransactionAttribute) {
 					DefaultTransactionAttribute dta = (DefaultTransactionAttribute) txAttr;
@@ -174,20 +187,25 @@ public abstract class AbstractFallbackTransactionAttributeSource
 
 		// The method may be on an interface, but we need attributes from the target class.
 		// If the target class is null, the method will be unchanged.
+		// method是接口中的方法
+		// specificMethod是具体实现类的方法
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
 		// First try is the method in the target class.
+		// 先在目标类方法上找
 		TransactionAttribute txAttr = findTransactionAttribute(specificMethod);
 		if (txAttr != null) {
 			return txAttr;
 		}
 
 		// Second try is the transaction attribute on the target class.
+		// 再在目标类上找
 		txAttr = findTransactionAttribute(specificMethod.getDeclaringClass());
 		if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
 			return txAttr;
 		}
 
+		// 降级到接口跟接口中的方法上找这个注解
 		if (specificMethod != method) {
 			// Fallback is to look at the original method.
 			txAttr = findTransactionAttribute(method);

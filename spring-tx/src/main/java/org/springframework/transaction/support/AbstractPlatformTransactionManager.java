@@ -343,35 +343,51 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	public final TransactionStatus getTransaction(@Nullable TransactionDefinition definition)
 			throws TransactionException {
 
+		/**
+		 * TransactionDefinition主要作用是给出一份事务属性的定义，然后事务管理器根据给出的定义来创建事务，TransactionStatus主要用来描述创建后的事务的状态。
+		 */
 		// Use defaults if no transaction definition given.
+		// 事务的属性（TransactionAttribute）,通过解析@Transacational注解得到
 		TransactionDefinition def = (definition != null ? definition : TransactionDefinition.withDefaults());
 
+		// 获取一个数据库事务对象（DataSourceTransactionObject），
+		// 这个对象中封装了一个从当前线程上下文中获取到的连接
 		Object transaction = doGetTransaction();
 		boolean debugEnabled = logger.isDebugEnabled();
 
+		// 判断是否存在事务
+		// 如果之前获取到的连接不为空，并且连接上激活了事务，那么就为true
 		if (isExistingTransaction(transaction)) {
 			// Existing transaction found -> check propagation behavior to find out how to behave.
+			// 如果已经存在了事务，需要根据不同传播机制进行不同的处理
 			return handleExistingTransaction(def, transaction, debugEnabled);
 		}
 
 		// Check definition settings for new transaction.
+		// 校验新事务的超时设置，默认为-1，代表不进行超时检查
 		if (def.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
 			throw new InvalidTimeoutException("Invalid transaction timeout", def.getTimeout());
 		}
 
 		// No existing transaction found -> check propagation behavior to find out how to proceed.
+		// 检查隔离级别是否为mandatory（强制性要求必须开启事务）
+		// 如果为mandatory，但是没有事务存在，那么抛出异常
 		if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
 			throw new IllegalTransactionStateException(
 					"No existing transaction found for transaction marked with propagation 'mandatory'");
 		}
+		// 目前为止没有事务，并且隔离级别不是mandatory
 		else if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
 				def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
 				def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
+			// 当隔离级别为required,required_new,nested时均需要新建事务
+			// 如果存在同步，将注册的同步挂起
 			SuspendedResourcesHolder suspendedResources = suspend(null);
 			if (debugEnabled) {
 				logger.debug("Creating new transaction with name [" + def.getName() + "]: " + def);
 			}
 			try {
+				// 开启一个新事务
 				return startTransaction(def, transaction, debugEnabled, suspendedResources);
 			}
 			catch (RuntimeException | Error ex) {
@@ -385,7 +401,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.warn("Custom isolation level specified but no actual transaction initiated; " +
 						"isolation level will effectively be ignored: " + def);
 			}
+			// 创建一个空事务，没有实际的事务提交以及回滚机制
 			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
+			// 会激活同步：将数据库连接绑定到当前线程上
 			return prepareTransactionStatus(def, null, true, newSynchronization, debugEnabled, null);
 		}
 	}

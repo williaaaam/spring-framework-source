@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 
 /**
+ * 激活Spring基于注解驱动的事务管理能力，等同于<tx:annotation-driven/>但注解更加灵活
  * Enables Spring's annotation-driven transaction management capability, similar to
  * the support found in Spring's {@code <tx:*>} XML namespace. To be used on
  * {@link org.springframework.context.annotation.Configuration @Configuration}
@@ -163,6 +164,8 @@ import org.springframework.core.Ordered;
 public @interface EnableTransactionManagement {
 
 	/**
+	 * 默认使用JDK代理
+	 * 需要注意的是，@EnableTransactionManagement的proxyTargetClass会影响Spring中所有通过自动代理生成的对象。如果将proxyTargetClass设置为true，那么意味通过@EnableAspectJAutoProxy所生成的代理对象也会使用cglib进行代理。
 	 * Indicate whether subclass-based (CGLIB) proxies are to be created ({@code true}) as
 	 * opposed to standard Java interface-based proxies ({@code false}). The default is
 	 * {@code false}. <strong>Applicable only if {@link #mode()} is set to
@@ -177,6 +180,7 @@ public @interface EnableTransactionManagement {
 	boolean proxyTargetClass() default false;
 
 	/**
+	 * 使用哪种代理模式，Spring AOP还是AspectJ
 	 * Indicate how transactional advice should be applied.
 	 * <p><b>The default is {@link AdviceMode#PROXY}.</b>
 	 * Please note that proxy mode allows for interception of calls through the proxy
@@ -189,6 +193,8 @@ public @interface EnableTransactionManagement {
 	AdviceMode mode() default AdviceMode.PROXY;
 
 	/**
+	 * 为了完成事务管理，会向容器中添加通知
+	 * 这个order属性代表了通知Advisor(绑定了特定切点的通知)的执行优先级
 	 * Indicate the ordering of the execution of the transaction advisor
 	 * when multiple advices are applied at a specific joinpoint.
 	 * <p>The default is {@link Ordered#LOWEST_PRECEDENCE}.

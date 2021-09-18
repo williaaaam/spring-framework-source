@@ -27,6 +27,7 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
 /**
+ * 这个类实现了ImportBeanDefinitionRegistrar,它的作用是向容器中注册别的BeanDefinition
  * Registers an auto proxy creator against the current {@link BeanDefinitionRegistry}
  * as appropriate based on an {@code @Enable*} annotation having {@code mode} and
  * {@code proxyTargetClass} attributes set to the correct values.
@@ -41,6 +42,8 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 	private final Log logger = LogFactory.getLog(getClass());
 
 	/**
+	 * AnnotationMetadata，代表的是AutoProxyRegistrar的导入类的元信息
+	 * 既包含了类元信息，也包含了注解元信息
 	 * Register, escalate, and configure the standard auto proxy creator (APC) against the
 	 * given registry. Works by finding the nearest annotation declared on the importing
 	 * {@code @Configuration} class that has both {@code mode} and {@code proxyTargetClass}
@@ -58,20 +61,31 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 		boolean candidateFound = false;
+		// 获取@EnableTransactionManagement所在配置类上的注解元信息
 		Set<String> annTypes = importingClassMetadata.getAnnotationTypes();
+		// 遍历注解
 		for (String annType : annTypes) {
+			// 可以理解为将注解中的属性转换成一个map
 			AnnotationAttributes candidate = AnnotationConfigUtils.attributesFor(importingClassMetadata, annType);
 			if (candidate == null) {
 				continue;
 			}
+			// 直接从map中获取对应的属性
+			// mode表示使用Spring AOP还是AspectJ代理
 			Object mode = candidate.get("mode");
 			Object proxyTargetClass = candidate.get("proxyTargetClass");
+
+			// mode，代理模型，一般都是SpringAOP
+			// proxyTargetClass,是否使用cglib代理
 			if (mode != null && proxyTargetClass != null && AdviceMode.class == mode.getClass() &&
 					Boolean.class == proxyTargetClass.getClass()) {
+				// 注解中存在这两个属性，并且属性类型符合要求，表示找到了合适的注解
 				candidateFound = true;
 				if (mode == AdviceMode.PROXY) {
+					// 实际上会往容器中注册一个InfrastructureAdvisorAutoProxyCreator
 					AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
 					if ((Boolean) proxyTargetClass) {
+						//给AnnotationAwareAspectJAutoProxyCreator属性 proxyTargetClass设置为Boolean.TRUE
 						AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 						return;
 					}

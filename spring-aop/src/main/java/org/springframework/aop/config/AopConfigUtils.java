@@ -52,14 +52,18 @@ public abstract class AopConfigUtils {
 			"org.springframework.aop.config.internalAutoProxyCreator";
 
 	/**
+	 * 按照升序来存储auto proxy creator
 	 * Stores the auto proxy creator classes in escalation order.
 	 */
 	private static final List<Class<?>> APC_PRIORITY_LIST = new ArrayList<>(3);
 
 	static {
 		// Set up the escalation list...
+		//InfrastructureAdvisorAutoProxyCreator只会使用容器内部定义的Advisor，会忽略应用程序定义的Advisors
 		APC_PRIORITY_LIST.add(InfrastructureAdvisorAutoProxyCreator.class);
 		APC_PRIORITY_LIST.add(AspectJAwareAdvisorAutoProxyCreator.class);
+		// AnnotationAwareAspectJAutoProxyCreator会使用所有实现了Advisor接口的通知
+		// @EnableAspectJAutoProxy跟@EnableTransactionManagement同时使用会导致AnnotationAwareAspectJAutoProxyCreator覆盖InfrastructureAdvisorAutoProxyCreator，前者作用范围的Advisor大于后者
 		APC_PRIORITY_LIST.add(AnnotationAwareAspectJAutoProxyCreator.class);
 	}
 
@@ -117,17 +121,29 @@ public abstract class AopConfigUtils {
 		}
 	}
 
+	/**
+	 * 注册或者升级AutoProxyCreator
+	 * @param cls
+	 * @param registry
+	 * @param source
+	 * @return
+	 */
 	@Nullable
 	private static BeanDefinition registerOrEscalateApcAsRequired(
 			Class<?> cls, BeanDefinitionRegistry registry, @Nullable Object source) {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 
+		// org.springframework.aop.config.internalAutoProxyCreator
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+			// 当前要注册的AutoProxyCreator对应的bd 和容器中的不相等
 			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
+				// 当前已经注册到容器中的Bean的优先级
 				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
+				// 当前准备注册到容器中的Bean的优先级
 				int requiredPriority = findPriorityForClass(cls);
+				// 谁的优先级大就注册谁，AnnotationAwareAspectJAutoProxyCreator是最大的
 				if (currentPriority < requiredPriority) {
 					apcDefinition.setBeanClassName(cls.getName());
 				}
@@ -135,9 +151,12 @@ public abstract class AopConfigUtils {
 			return null;
 		}
 
+		// 注册当前cls对应的bd
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
 		beanDefinition.setSource(source);
+		// 设置order为最高优先级，数值越小，优先级越高
 		beanDefinition.getPropertyValues().add("order", Ordered.HIGHEST_PRECEDENCE);
+		// Spring内部bean
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
 		return beanDefinition;
