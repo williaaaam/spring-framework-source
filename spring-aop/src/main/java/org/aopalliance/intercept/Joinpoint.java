@@ -53,6 +53,7 @@ public interface Joinpoint {
 	Object proceed() throws Throwable;
 
 	/**
+	 * 这里一般指的是被代理的对象
 	 * Return the object that holds the current joinpoint's static part.
 	 * <p>For instance, the target object for an invocation.
 	 * @return the object (can be null if the accessible object is static)

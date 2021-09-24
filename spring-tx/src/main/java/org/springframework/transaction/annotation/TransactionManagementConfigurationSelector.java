@@ -29,11 +29,11 @@ import org.springframework.util.ClassUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
- * @since 3.1
  * @see EnableTransactionManagement
  * @see ProxyTransactionManagementConfiguration
  * @see TransactionManagementConfigUtils#TRANSACTION_ASPECT_CONFIGURATION_CLASS_NAME
  * @see TransactionManagementConfigUtils#JTA_TRANSACTION_ASPECT_CONFIGURATION_CLASS_NAME
+ * @since 3.1
  */
 public class TransactionManagementConfigurationSelector extends AdviceModeImportSelector<EnableTransactionManagement> {
 
@@ -46,13 +46,18 @@ public class TransactionManagementConfigurationSelector extends AdviceModeImport
 	@Override
 	protected String[] selectImports(AdviceMode adviceMode) {
 		switch (adviceMode) {
+			// 默认Spring自己实现的AOP;Spring AOP是基于代理的AOP框架：先给目标对象生成代理proxies，再把aspects应用于proxies;运行时run-time织入，较AspectJ慢8-35倍
+			// 参考：https://www.baeldung.com/spring-aop-vs-aspectj
 			case PROXY:
-				return new String[] {
+				return new String[]{
+						// AutoProxyRegistrar用于开启自动代理
 						AutoProxyRegistrar.class.getName(),
 						// 导入AutoProxyRegistrar和ProxyTransactionManagementConfiguration 配置类
 						ProxyTransactionManagementConfiguration.class.getName()};
+			// 使用AspectJ实现的AOP功能
+			// 不支持运行时织入；仅支持编译时compile-time、编译后post-compile，加载load-time时织入
 			case ASPECTJ:
-				return new String[] {determineTransactionAspectClass()};
+				return new String[]{determineTransactionAspectClass()};
 			default:
 				return null;
 		}

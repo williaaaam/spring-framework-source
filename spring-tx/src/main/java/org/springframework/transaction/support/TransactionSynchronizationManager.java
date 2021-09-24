@@ -178,8 +178,8 @@ public abstract class TransactionSynchronizationManager {
 	 * 如果使用了事务管理器对事务进行管理，那么在开启事务时，Spring会提前绑定一个数据库连接到当前线程中
 	 * Bind the given resource for the given key to the current thread.
 	 *
-	 * @param key   the key to bind the value to (usually the resource factory)
-	 * @param value the value to bind (usually the active resource object)
+	 * @param key   the key to bind the value to (usually the resource factory) key一般是数据源
+	 * @param value the value to bind (usually the active resource object) value一般是数据源上的一个连接
 	 * @throws IllegalStateException if there is already a value bound to the thread
 	 * @see ResourceTransactionManager#getResourceFactory()
 	 */

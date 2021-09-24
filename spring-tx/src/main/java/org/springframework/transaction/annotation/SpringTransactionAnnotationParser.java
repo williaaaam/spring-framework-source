@@ -74,10 +74,11 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 		// 最终返回的是一个RuleBasedTransactionAttribute
 		// 在上篇文章分析过了，定义了在出现异常时如何回滚
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
-
 		Propagation propagation = attributes.getEnum("propagation");
+		// 设置传播属性
 		rbta.setPropagationBehavior(propagation.value());
 		Isolation isolation = attributes.getEnum("isolation");
+		// 隔离级别
 		rbta.setIsolationLevel(isolation.value());
 
 		rbta.setTimeout(attributes.getNumber("timeout").intValue());

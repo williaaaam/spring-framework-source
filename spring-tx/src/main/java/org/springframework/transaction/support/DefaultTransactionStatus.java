@@ -66,6 +66,15 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 
 
 	/**
+	 * // definition：事务的定义，解析@Transactional注解得到的
+	 * // transaction：通过前面的doGetTransaction方法得到的，关联了一个数据库连接
+	 * // newTransaction：是否是一个新的事务
+	 * // debug：是否开启debug级别日志
+	 * // newSynchronization：是否需要一个新的同步
+	 * // suspendedResources：代表了执行当前事务时挂起的资源
+	 * ————————————————
+	 * 版权声明：本文为CSDN博主「程序员DMZ」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+	 * 原文链接：https://blog.csdn.net/qq_41907991/article/details/108052314
 	 * Create a new {@code DefaultTransactionStatus} instance.
 	 * @param transaction underlying transaction object that can hold state
 	 * for the internal transaction implementation

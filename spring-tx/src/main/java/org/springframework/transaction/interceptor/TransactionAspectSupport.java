@@ -758,14 +758,23 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		@Nullable
 		private final PlatformTransactionManager transactionManager;
 
+		/**
+		 * 事务属性，解析@TransactionInfo注解得到
+		 */
 		@Nullable
 		private final TransactionAttribute transactionAttribute;
 
+		/**
+		 * 事务名
+		 */
 		private final String joinpointIdentification;
 
 		@Nullable
 		private TransactionStatus transactionStatus;
 
+		/**
+		 * 与当前创建的关联的上一个事务信息
+		 */
 		@Nullable
 		private TransactionInfo oldTransactionInfo;
 

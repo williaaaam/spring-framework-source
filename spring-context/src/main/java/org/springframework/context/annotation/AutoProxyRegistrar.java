@@ -62,6 +62,8 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 		boolean candidateFound = false;
 		// 获取@EnableTransactionManagement所在配置类上的注解元信息
+		// 例如此处importingClassMetadata introspectedClass=class com.example.springcloud.transaction.config.AppConfig
+		// 获取AppConfig上所有注解
 		Set<String> annTypes = importingClassMetadata.getAnnotationTypes();
 		// 遍历注解
 		for (String annType : annTypes) {
