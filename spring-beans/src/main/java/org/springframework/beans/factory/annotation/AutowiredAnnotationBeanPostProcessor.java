@@ -432,6 +432,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	}
 
 	/**
+	 * Spring提供给外部使用的方法，自己不会主动调用：例如给容器之外的实例注入容器托管的属性
 	 * 'Native' processing method for direct calls with an arbitrary target instance,
 	 * resolving all of its fields and methods which are annotated with one of the
 	 * configured 'autowired' annotation types.
@@ -488,6 +489,13 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		return metadata;
 	}
 
+	/**
+	 * 构建@Autowired注入元数据方法
+	 * 简单的说就是找到该Class类下有哪些是需要做依赖注入的
+	 *
+	 * @param clazz
+	 * @return
+	 */
 	private InjectionMetadata buildAutowiringMetadata(final Class<?> clazz) {
 		if (!AnnotationUtils.isCandidateClass(clazz, this.autowiredAnnotationTypes)) {
 			return InjectionMetadata.EMPTY;
@@ -502,7 +510,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			//创建一个存储当前正在处理类注解元信息的集合
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
-			// 利用JDK反射机制获取给定类中所有的声明字段，获取字段上的注解信息
+			// 利用JDK反射机制获取给定类中所有的声明字段(包括静态字段)，获取字段上的注解信息
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
 				// 获取给定字段上的注解:@Autowired. @Value或者@Inject注解
 				MergedAnnotation<?> ann = findAutowiredAnnotation(field);
@@ -531,7 +539,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 				//获取给定方法上的所有注解
 				MergedAnnotation<?> ann = findAutowiredAnnotation(bridgedMethod);
 				if (ann != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-					// 如果方法是静态的，则直接遍历下一个方法
+					// 如果方法是静态的，则直接遍历下一个方法,@Autowired不支持静态方法注入
 					if (Modifier.isStatic(method.getModifiers())) {
 						if (logger.isInfoEnabled()) {
 							logger.info("Autowired annotation is not supported on static methods: " + method);
