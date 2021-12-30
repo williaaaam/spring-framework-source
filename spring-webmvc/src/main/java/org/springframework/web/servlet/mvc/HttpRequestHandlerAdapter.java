@@ -40,6 +40,11 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class HttpRequestHandlerAdapter implements HandlerAdapter {
 
+	/**
+	 * Controller对象实现HttpRequestHandler的方式
+	 * @param handler the handler object to check
+	 * @return
+	 */
 	@Override
 	public boolean supports(Object handler) {
 		return (handler instanceof HttpRequestHandler);
