@@ -606,6 +606,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
+			// 获取告诉子类初始化Bean工厂
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
@@ -621,23 +622,27 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Invoke factory processors registered as beans in the context.
 
 				/**
+				 * Bean工厂后置处理器
 				 * 执行已经注册在容器中的bean工厂的后置处理器，在这里完成的扫描
 				 */
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
 				/**
+				 * Bean后置处理器
 				 * Spring扩展点之BeanPostProcessor
 				 */
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
 
 				// Initialize message source for this context.
+				// 初始化国际资源处理器
 				initMessageSource();
 
+				// 初始化时间多播器
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
-
+				// SpringBoot也是从这个方法启动Tomcat的
 				// Initialize other special beans in specific context subclasses.
 				onRefresh();
 
@@ -722,6 +727,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 告诉子类刷新内部Bean工厂
 	 * Tell the subclass to refresh the internal bean factory.
 	 *
 	 * @return the fresh BeanFactory instance

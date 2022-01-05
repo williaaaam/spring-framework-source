@@ -60,7 +60,9 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
+		// 实例化Spring Root上下文,将ContextLoaderListener注册到ServletContext
 		super.onStartup(servletContext);
+		// 注册DispatcherServlet 创建Spring Web上下文对象，将DispatcherServlet注册到ServletContext
 		registerDispatcherServlet(servletContext);
 	}
 
@@ -78,27 +80,30 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	protected void registerDispatcherServlet(ServletContext servletContext) {
 		String servletName = getServletName();
 		Assert.hasLength(servletName, "getServletName() must not return null or empty");
-
+		// 创建WebApplicationContext对象
 		WebApplicationContext servletAppContext = createServletApplicationContext();
 		Assert.notNull(servletAppContext, "createServletApplicationContext() must not return null");
-
+		// 创建DispatcherServlet对象，tomcat会对DispatcherServlet进行生命周期管理
 		FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
 		Assert.notNull(dispatcherServlet, "createDispatcherServlet(WebApplicationContext) must not return null");
 		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
-
+		// 前端控制器注册到ServletContext中
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
 		if (registration == null) {
 			throw new IllegalStateException("Failed to register servlet with name '" + servletName + "'. " +
 					"Check if there is another servlet registered under the same name.");
 		}
-
+		// 启动级别
 		registration.setLoadOnStartup(1);
+		// 映射路径
 		registration.addMapping(getServletMappings());
+		// 异步支持
 		registration.setAsyncSupported(isAsyncSupported());
 
 		Filter[] filters = getServletFilters();
 		if (!ObjectUtils.isEmpty(filters)) {
 			for (Filter filter : filters) {
+				// 注册Filter
 				registerServletFilter(servletContext, filter);
 			}
 		}

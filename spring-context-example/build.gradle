@@ -7,16 +7,41 @@ version '5.3.9-SNAPSHOT'
 
 repositories {
     mavenLocal()
-    maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
-    maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter'}
+    maven {
+        url 'https://maven.aliyun.com/nexus/content/groups/public/'
+    }
+    maven {
+        url 'https://maven.aliyun.com/nexus/content/repositories/jcenter'
+    }
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+
     mavenCentral()
 }
+
+// Apply the java plugin to add support for Java
+apply plugin: 'idea' // 如果是eclipse则改为'eclipse'
+// war插件已将java插件包含在内. 不用再配置'java'插件了
+apply plugin: 'war'
+apply from: 'gretty.plugin'
+
 
 dependencies {
     /*compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'*/
     compile 'javax.annotation:javax.annotation-api:1.3.2'
     compile 'org.aspectj:aspectjtools:1.8.14'
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.48'
+    /*implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.48'*/
+    implementation group: 'org.eclipse.jetty.aggregate', name: 'jetty-all', version: '9.2.19.v20160908'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     implementation project(":spring-context")
+    implementation project(":spring-web")
+    implementation project(":spring-webmvc")
+}
+
+gretty {
+    httpPort = 8081
+    // 'jetty7', 'jetty8', 'jetty9', 'jetty93', 'jetty94', 'tomcat7', 'tomcat8'
+    servletContainer = 'jetty9'
+    contextPath = '/'
 }

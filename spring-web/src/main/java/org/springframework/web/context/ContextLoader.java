@@ -280,15 +280,17 @@ public class ContextLoader {
 			}
 			if (this.context instanceof ConfigurableWebApplicationContext) {
 				ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext) this.context;
-				if (!cwac.isActive()) {
+				if (!cwac.isActive()) { // 没有激活
 					// The context has not yet been refreshed -> provide services such as
 					// setting the parent context, setting the application context id, etc
-					if (cwac.getParent() == null) {
+					if (cwac.getParent() == null) { // 判断有没有父容器
 						// The context instance was injected without an explicit parent ->
 						// determine parent for root web application context, if any.
+						// 空实现
 						ApplicationContext parent = loadParentContext(servletContext);
 						cwac.setParent(parent);
 					}
+					//
 					configureAndRefreshWebApplicationContext(cwac, servletContext);
 				}
 			}
@@ -398,6 +400,7 @@ public class ContextLoader {
 		}
 
 		customizeContext(sc, wac);
+		//
 		wac.refresh();
 	}
 

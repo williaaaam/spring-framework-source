@@ -1,6 +1,8 @@
 package com.xjz.springframework.controller;
 
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @author william
@@ -10,7 +12,6 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class OhMyController {
-
 
 	public void run() {
 

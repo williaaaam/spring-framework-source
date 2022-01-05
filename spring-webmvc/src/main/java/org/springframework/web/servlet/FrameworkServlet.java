@@ -558,23 +558,28 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see #setContextConfigLocation
 	 */
 	protected WebApplicationContext initWebApplicationContext() {
+		// 从ServletContext对象中获取Spring Root上下文对象
+		// 我们在Spring根容器上下文创建成功后放入到ServletContext对象中
 		WebApplicationContext rootContext =
 				WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		WebApplicationContext wac = null;
-
+		// webApplicationContext对象是在创建DispatcherServlet对象的时候存放进来的对象
 		if (this.webApplicationContext != null) {
 			// A context instance was injected at construction time -> use it
 			wac = this.webApplicationContext;
+			//
 			if (wac instanceof ConfigurableWebApplicationContext) {
 				ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext) wac;
-				if (!cwac.isActive()) {
+				if (!cwac.isActive()) { // 是否激活
 					// The context has not yet been refreshed -> provide services such as
 					// setting the parent context, setting the application context id, etc
 					if (cwac.getParent() == null) {
 						// The context instance was injected without an explicit parent -> set
 						// the root application context (if any; may be null) as the parent
+						// 父容器设置到子容器   父子容器
 						cwac.setParent(rootContext);
 					}
+					// 刷新子容器Spring MVC上下文
 					configureAndRefreshWebApplicationContext(cwac);
 				}
 			}
@@ -683,7 +688,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 						ObjectUtils.getDisplayString(getServletContext().getContextPath()) + '/' + getServletName());
 			}
 		}
-
+		//
 		wac.setServletContext(getServletContext());
 		wac.setServletConfig(getServletConfig());
 		wac.setNamespace(getNamespace());
@@ -699,6 +704,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		postProcessWebApplicationContext(wac);
 		applyInitializers(wac);
+		// 父子容器会分别调用这个方法
+		// 刷新子容器，子容器一般只扫描RestController
 		wac.refresh();
 	}
 
