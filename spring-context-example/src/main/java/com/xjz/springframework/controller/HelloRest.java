@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @RestController
 public class HelloRest {
+
     @Autowired
     private PrintServer printServer;
 

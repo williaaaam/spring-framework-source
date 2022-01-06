@@ -53,7 +53,7 @@ public class SimpleControllerHandlerAdapter implements HandlerAdapter {
 	@Nullable
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-
+		// 控制器实现了接口Controller,所以可以强转(Controller)handler
 		return ((Controller) handler).handleRequest(request, response);
 	}
 

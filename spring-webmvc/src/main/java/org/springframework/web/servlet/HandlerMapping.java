@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.lang.Nullable;
 
 /**
+ * 处理器映射器
  * Interface to be implemented by objects that define a mapping between
  * requests and handler objects.
  *
