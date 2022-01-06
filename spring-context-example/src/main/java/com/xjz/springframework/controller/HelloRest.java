@@ -1,5 +1,6 @@
 package com.xjz.springframework.controller;
 
+import com.xjz.springframework.model.OrderQuery;
 import com.xjz.springframework.service.PrintServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +16,9 @@ public class HelloRest {
     private PrintServer printServer;
 
     @GetMapping(path = "hello", produces="text/html;charset=UTF-8")
-    public String sayHello(HttpServletRequest request) {
-        printServer.print();
-        return "hello, " + request.getParameter("name");
+    public String sayHello(HttpServletRequest request, OrderQuery orderQuery) {
+        //printServer.print();
+        return "hello, " + orderQuery.hashCode();
     }
 
 
@@ -25,4 +26,5 @@ public class HelloRest {
     public String index() {
         return UUID.randomUUID().toString();
     }
+
 }

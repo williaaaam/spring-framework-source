@@ -71,6 +71,8 @@ import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.WebUtils;
 
 /**
+ * FramewowrkServlet初始化了WebApplicationContext，
+ * DispatcherServlet初始化了自身的9个组件。本篇博客的内容就是对9个组件做个概览
  * Base servlet for Spring's web framework. Provides integration with
  * a Spring application context, in a JavaBean-based overall solution.
  *
