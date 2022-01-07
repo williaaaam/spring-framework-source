@@ -130,12 +130,14 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		parameter = parameter.nestedIfOptional();
+		// 交给HttpMessageConverter解析json数据, HttpMessageConvertrt返回的是一个完整的已经绑定好数据的对象
 		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getNestedGenericParameterType());
 		String name = Conventions.getVariableNameForParameter(parameter);
 
 		if (binderFactory != null) {
 			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
 			if (arg != null) {
+				// 然后交给WebDataBinder进行数据校验
 				validateIfApplicable(binder, parameter);
 				if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
 					throw new MethodArgumentNotValidException(parameter, binder.getBindingResult());

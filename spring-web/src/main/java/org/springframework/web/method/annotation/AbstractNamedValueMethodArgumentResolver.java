@@ -120,8 +120,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		}
 
 		if (binderFactory != null) {
+			// 创建出一个WebDataBinder
 			WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
 			try {
+				// 完成数据转换（比如String转Date、String转...等等）
 				arg = binder.convertIfNecessary(arg, parameter.getParameterType(), parameter);
 			}
 			catch (ConversionNotSupportedException ex) {

@@ -638,6 +638,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * 添加内置和用户自定义的Resolver
 	 * Return the list of argument resolvers to use including built-in resolvers
 	 * and custom resolvers provided via {@link #setCustomArgumentResolvers}.
 	 */

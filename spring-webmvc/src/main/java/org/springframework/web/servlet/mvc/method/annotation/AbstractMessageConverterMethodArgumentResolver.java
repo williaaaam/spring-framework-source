@@ -172,9 +172,10 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		EmptyBodyCheckingHttpInputMessage message;
 		try {
 			message = new EmptyBodyCheckingHttpInputMessage(inputMessage);
-
+			// 遍历 messageConverters
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
 				Class<HttpMessageConverter<?>> converterType = (Class<HttpMessageConverter<?>>) converter.getClass();
+				// 主要判断 MappingJackson2HttpMessageConverter 是否是 GenericHttpMessageConverter 类型
 				GenericHttpMessageConverter<?> genericConverter =
 						(converter instanceof GenericHttpMessageConverter ? (GenericHttpMessageConverter<?>) converter : null);
 				if (genericConverter != null ? genericConverter.canRead(targetType, contextClass, contentType) :

@@ -1072,7 +1072,7 @@ public class DispatcherServlet extends FrameworkServlet {
 						return;
 					}
 				}
-
+				// 拦截器HandlerInterceptor#preHandle方法
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
@@ -1086,7 +1086,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				applyDefaultViewName(processedRequest, mv);
-				// 拦截器
+				// 拦截器postHandle
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
@@ -1098,6 +1098,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
 			// 处理转发的结果信息
+			// 视图渲染完成之后执行拦截器的afterCompletion方法
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
