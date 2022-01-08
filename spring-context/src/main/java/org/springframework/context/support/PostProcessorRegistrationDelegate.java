@@ -59,7 +59,7 @@ final class PostProcessorRegistrationDelegate {
 	/**
 	 * 1. 先执行直接实现了BeanDefinitionRegistryPostProcessor接口的后置处理器，所有实现了BeanDefinitionRegistryPostProcessor接口的类有两个方法，一个是特有的postProcessBeanDefinitionRegistry方法，一个是继承子父接口的postProcessBeanFactory方法。
 	 * postProcessBeanDefinitionRegistry方法早于postProcessBeanFactory方法执行，
-	 * 对于postProcessBeanDefinitionRegistry的执行顺序又遵循如下原子
+	 * 对于postProcessBeanDefinitionRegistry的执行顺序又遵循如下原则
 	 * 1.1 先执行实现了PriorityOrdered接口的类中的postProcessBeanDefinitionRegistry方法
 	 * 1.2 再执行实现了Ordered接口的类中的postProcessBeanDefinitionRegistry的方法
 	 * 1.3 最后执行没有实现上面两个接口的类中的postProcessBeanDefinitionRegistry的方法

@@ -1,14 +1,13 @@
 package com.xjz.springframework.factory;
 
-import com.xjz.springframework.domain.Foo;
 import com.xjz.springframework.service.OrderService;
 import com.xjz.springframework.service.UserService;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 /**
+ *
  * @author Williami
  * @description
  * @date 2021/7/22
