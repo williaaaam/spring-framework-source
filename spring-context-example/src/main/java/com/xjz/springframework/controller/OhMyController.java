@@ -19,7 +19,7 @@ public class OhMyController {
 
 	public String eat(String name) {
 		System.out.println(this + " 目标方法执行, arg name= " + name);
-		if ("zhouxinjian".equals(name)) {
+		if ("giegie".equals(name)) {
 			/**
 			 * 切面1 环绕通知开始
 			 * 切面1 before joinPoint.getThis()获取代理对象= com.xjz.springframework.controller.OnMyController@308a6984

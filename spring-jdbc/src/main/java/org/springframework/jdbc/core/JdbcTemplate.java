@@ -60,6 +60,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 
 /**
+ * 模板模式，通过Callback回调来实现
  * <b>This is the central class in the JDBC core package.</b>
  * It simplifies the use of JDBC and helps to avoid common errors.
  * It executes core JDBC workflow, leaving application code to provide SQL

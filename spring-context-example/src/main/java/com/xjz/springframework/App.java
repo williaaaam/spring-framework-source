@@ -1,5 +1,6 @@
 package com.xjz.springframework;
 
+import com.xjz.springframework.config.AppConfigVX;
 import com.xjz.springframework.config.RootConfig;
 import com.xjz.springframework.config.WebConfig;
 import org.eclipse.jetty.server.Server;
@@ -18,6 +19,7 @@ public class App {
 
 	/**
 	 * 通过应用程序来启动项目，不会执行SpringServletContainerInitializer的onStartup方法，进而也不会调用WebApplicationInitializer#onStartUp()方法
+	 *
 	 * @param args
 	 * @throws Exception
 	 */
@@ -31,12 +33,15 @@ public class App {
 		handler.setContextPath("/");
 
 		AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext();
-		applicationContext.register(WebConfig.class);
-		applicationContext.register(RootConfig.class);
+//		applicationContext.register(WebConfig.class);
+//		applicationContext.register(RootConfig.class);
+		applicationContext.register(AppConfigVX.class);
+		applicationContext.refresh();
 
 		//相当于web.xml中配置的ContextLoaderListener
 		handler.addEventListener(new ContextLoaderListener(applicationContext));
 
+		// 创建并注入DispatcherServlet Servlet 3.0 SPI
 		// springmvc拦截规则 相当于web.xml中配置的DispatcherServlet
 		handler.addServlet(new ServletHolder(new DispatcherServlet(applicationContext)), "/*");
 

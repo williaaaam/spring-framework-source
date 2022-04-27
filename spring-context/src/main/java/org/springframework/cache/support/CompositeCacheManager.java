@@ -30,6 +30,8 @@ import org.springframework.cache.CacheManager;
 import org.springframework.lang.Nullable;
 
 /**
+ * 组合模式:CompositeCacheManager -> CacheManager -> Cache
+ * 组合模式主要应用在能表示成树形结构的一组数据上
  * Composite {@link CacheManager} implementation that iterates over
  * a given collection of delegate {@link CacheManager} instances.
  *

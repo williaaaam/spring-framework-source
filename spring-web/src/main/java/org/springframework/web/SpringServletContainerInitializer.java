@@ -33,6 +33,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
+ * SPI  META-INF/javax.servlet.ServletContainerInitializer
  * Servlet 3.0 {@link ServletContainerInitializer} designed to support code-based
  * configuration of the servlet container using Spring's {@link WebApplicationInitializer}
  * SPI as opposed to (or possibly in combination with) the traditional
@@ -110,7 +111,7 @@ import org.springframework.util.ReflectionUtils;
  * @see #onStartup(Set, ServletContext)
  * @see WebApplicationInitializer
  */
-@HandlesTypes(WebApplicationInitializer.class)
+@HandlesTypes(WebApplicationInitializer.class) // 将实现类注入到onStartUp方法中，Set<Class<?>> webAppInitializerClasses
 public class SpringServletContainerInitializer implements ServletContainerInitializer {
 
 	/**
