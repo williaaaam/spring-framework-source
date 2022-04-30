@@ -17,4 +17,25 @@ public class AutowiredTests {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfigV8.class);
 		applicationContext.registerShutdownHook();
 	}
+
+	@Test
+	public void testParentAndChild() {
+
+		Parent parent = new Child();
+		// 运行时错误
+		Child c = (Child) new Parent();
+		c.m();
+
+	}
+
+
+	public static class Parent {
+
+	}
+
+	public static class Child extends Parent {
+		public void m(){
+
+		}
+	}
 }

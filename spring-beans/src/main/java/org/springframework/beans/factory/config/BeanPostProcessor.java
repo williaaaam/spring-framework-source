@@ -79,6 +79,8 @@ public interface BeanPostProcessor {
 	}
 
 	/**
+	 * 在这个方法中完成AOP代理
+	 * <p>
 	 * Bean初始化之后调用
 	 * Apply this {@code BeanPostProcessor} to the given new bean instance <i>after</i> any bean
 	 * initialization callbacks (like InitializingBean's {@code afterPropertiesSet}

@@ -21,6 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 @Controller
 public class Demo2Controller {
 
+	public Demo2Controller(){
+		System.out.println();
+	}
+
 	@RequestMapping("/controller/annotation")
 	@ResponseBody
 	public String order(HttpServletRequest request, HttpServletResponse response) {

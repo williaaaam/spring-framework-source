@@ -25,6 +25,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
 /**
+ * @Repository 只能标注在 DAO 类，因为该注解的作用不只是将类识别为Bean，同时它还能将所标注的类中抛出的数据访问异常封装为 Spring 的数据访问异常类型(unchecked exception)
  * Bean post-processor that automatically applies persistence exception translation to any
  * bean marked with Spring's @{@link org.springframework.stereotype.Repository Repository}
  * annotation, adding a corresponding {@link PersistenceExceptionTranslationAdvisor} to

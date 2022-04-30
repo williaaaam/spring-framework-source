@@ -109,6 +109,7 @@ class ConfigurationClassEnhancer {
 			return configClass;
 		}
 		// 否则调用newEnhancer方法先创建一个增强器，然后直接使用这个增强器生成代理类的字节码对象
+		// EnhancedConfiguration.class.isAssignFrom(enhancedClass) = true
 		Class<?> enhancedClass = createClass(newEnhancer(configClass, classLoader));
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Successfully enhanced %s; enhanced class name is: %s",
@@ -125,7 +126,8 @@ class ConfigurationClassEnhancer {
 		// 设置目标代理类
 		enhancer.setSuperclass(configSuperClass);
 		// 让代理类实现EnhancedConfiguration接口，这个接口继承了BeanFactoryAware接口
-		// 主要两个作用：1.起到标记作用，如果实现了，代表已经被代理过了
+		// 主要两个作用：
+		// 1.起到标记作用，如果实现了，代表已经被代理过了
 		// 2.代理类需要访问BeanFactory，所以实现了BeanFactoryAware接口
 		enhancer.setInterfaces(new Class<?>[]{EnhancedConfiguration.class});
 		// 设置生成的代理类不实现factory接口
