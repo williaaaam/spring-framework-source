@@ -529,6 +529,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		long startTime = System.currentTimeMillis();
 
 		try {
+			/**
+			 * @see ContextLoader#initWebApplicationContext(ServletContext)  会把初始化好的Root WebApplicationContext保存到ServletContext中
+			 */
 			this.webApplicationContext = initWebApplicationContext();
 			initFrameworkServlet();
 		}
@@ -560,6 +563,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see #setContextConfigLocation
 	 */
 	protected WebApplicationContext initWebApplicationContext() {
+		/**
+		 *
+		 */
 		// 从ServletContext对象中获取Spring Root上下文对象
 		// 我们在Spring根容器上下文创建成功后放入到ServletContext对象中
 		WebApplicationContext rootContext =

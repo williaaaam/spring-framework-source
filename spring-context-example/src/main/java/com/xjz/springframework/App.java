@@ -32,6 +32,7 @@ public class App {
 		//ip:port/项目路径/api请求路径
 		handler.setContextPath("/");
 
+		// Spring MVC容器
 		AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext();
 //		applicationContext.register(WebConfig.class);
 //		applicationContext.register(RootConfig.class);

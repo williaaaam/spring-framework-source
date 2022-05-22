@@ -611,6 +611,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 			// Prepare the bean factory for use in this context.
 			// 为bean工厂设置一些属性
+			// 注册ApplicationContext, BeanFactory, ApplicationEventPublisher
 			prepareBeanFactory(beanFactory);
 
 			try {
@@ -638,9 +639,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// 初始化国际资源处理器
 				initMessageSource();
 
-				// 初始化时间多播器
+				// 初始化事件多播器
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
+
 				// SpringBoot也是从这个方法启动Tomcat的
 				// Initialize other special beans in specific context subclasses.
 				onRefresh();
