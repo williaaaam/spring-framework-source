@@ -413,6 +413,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 *
 	 * Publish the given event to all listeners.
 	 * <p>Note: Listeners get initialized after the MessageSource, to be able
 	 * to access it within listener implementations. Thus, MessageSource
@@ -451,6 +452,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected void publishEvent(Object event, @Nullable ResolvableType eventType) {
 		Assert.notNull(event, "Event must not be null");
 
+		// 事件装饰为 ApplicationEvent
 		// Decorate event as an ApplicationEvent if necessary
 		ApplicationEvent applicationEvent;
 		if (event instanceof ApplicationEvent) {
@@ -462,10 +464,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 
+		// 容器启动的时候 earlyApplicationEvents 可能还没有初始化
 		// Multicast right now if possible - or lazily once the multicaster is initialized
-		if (this.earlyApplicationEvents != null) {
+		if (this.earlyApplicationEvents != null) {  // 延迟广播事件
 			this.earlyApplicationEvents.add(applicationEvent);
 		} else {
+			// 多播器初始化好了，直接广播事件
 			getApplicationEventMulticaster().multicastEvent(applicationEvent, eventType);
 		}
 
@@ -918,6 +922,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			DefaultLifecycleProcessor defaultProcessor = new DefaultLifecycleProcessor();
 			defaultProcessor.setBeanFactory(beanFactory);
 			this.lifecycleProcessor = defaultProcessor;
+			// 注册单例Bean
 			beanFactory.registerSingleton(LIFECYCLE_PROCESSOR_BEAN_NAME, this.lifecycleProcessor);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No '" + LIFECYCLE_PROCESSOR_BEAN_NAME + "' bean, using " +
@@ -960,6 +965,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		this.earlyApplicationEvents = null;
 		if (!CollectionUtils.isEmpty(earlyEventsToProcess)) {
 			for (ApplicationEvent earlyEvent : earlyEventsToProcess) {
+				// 立刻广播事件
 				getApplicationEventMulticaster().multicastEvent(earlyEvent);
 			}
 		}

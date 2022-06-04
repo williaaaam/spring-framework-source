@@ -24,6 +24,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
+ * 事件管理者，管理监听器和发布事件，ApplicationContext通过委托ApplicationEventMulticaster来 发布事件
+ *
  * Interface to be implemented by objects that can manage a number of
  * {@link ApplicationListener} objects and publish events to them.
  *
@@ -107,6 +109,7 @@ public interface ApplicationEventMulticaster {
 	void removeAllListeners();
 
 	/**
+	 * 广播事件给相应的监听器
 	 * Multicast the given application event to appropriate listeners.
 	 * <p>Consider using {@link #multicastEvent(ApplicationEvent, ResolvableType)}
 	 * if possible as it provides better support for generics-based events.

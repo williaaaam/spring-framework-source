@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @param <E> the specific {@code ApplicationEvent} subclass to listen to
+ * @param <E> the specific {@code ApplicationEvent} subclass to listen to  只能监听泛型表示的事件或者该事件的子类
  * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.event.ApplicationEventMulticaster
  * @see org.springframework.context.event.SmartApplicationListener

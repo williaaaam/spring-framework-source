@@ -261,7 +261,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
 			}
 		}
-		// 判断bean是否含有@Controller或者@RequestMappin注解
+
+		// 判断bean上是否含有@Controller或者@RequestMappin注解
 		if (beanType != null && isHandler(beanType)) {
 			detectHandlerMethods(beanName);
 		}
@@ -637,6 +638,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					this.pathLookup.add(path, mapping);
 				}
 
+				/**
+				 * 例如：DemoController 被@Controller注解，方法order()被@RequestMapping注解，则  name = DC#order
+				 */
 				String name = null;
 				if (getNamingStrategy() != null) {
 					name = getNamingStrategy().getName(handlerMethod, mapping);

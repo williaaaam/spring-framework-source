@@ -82,7 +82,7 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 	}
 
 	/**
-	 * 除了SprinProxy外，判断是否有用户提供的接口
+	 * 除了SpringProxy外，判断是否有用户提供的接口
 	 * Determine whether the supplied {@link AdvisedSupport} has only the
 	 * {@link org.springframework.aop.SpringProxy} interface specified
 	 * (or no proxy interfaces specified at all).

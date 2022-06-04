@@ -153,6 +153,7 @@ final class PostProcessorRegistrationDelegate {
 					 *                 // 正常情况下，只会有一个，就是Spring容器自己提供的ConfigurationClassPostProcessor,Spring通过这个类完成了扫描以及BeanDefinition的功能
 					 */
 					// 对于注解启动的Spring容器来说，是把key = org.springframework.context.annotation.internalConfigurationAnnotationProcessor对应的ConfigurationClassPostProcessor处理器加入到currentRegistryProcessors中
+					// 创建ConfigurationCLassPostProcessor Bean单例
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					// 去重
 					processedBeans.add(ppName);

@@ -19,6 +19,7 @@ package org.springframework.context.event;
 import org.springframework.context.ApplicationContext;
 
 /**
+ * 容器关闭时触发
  * Event raised when an {@code ApplicationContext} gets closed.
  *
  * @author Juergen Hoeller
