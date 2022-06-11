@@ -10,6 +10,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class B {
 	public B() {
-		System.out.println("B 构造器");
+		//System.out.println("B 构造器");
 	}
 }
