@@ -33,6 +33,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
+ * 我们知道SpringServletContainerInitializer从 servlet 3.0 开始，Tomcat 启动时会自动加载实现了 ServletContainerInitializer
+ * 接口的类（需要在 META-INF/services 目录下新建配置文件）也称为 SPI（Service Provider Interface） 机制，
+ * SPI的应用还是挺广的比如我们的JDBC、还有Dubbo框架里面都有用到，如果还有不是很了解SPI机制的 可以去学习下。
+ *
+ * 所以我们的入口就是SpringServletContainerInitializer的onStartup方法，这也应该是web容器启动调用Spring相关的第一个方法。
+ *
+ * SPI  META-INF/javax.servlet.ServletContainerInitializer
  * Servlet 3.0 {@link ServletContainerInitializer} designed to support code-based
  * configuration of the servlet container using Spring's {@link WebApplicationInitializer}
  * SPI as opposed to (or possibly in combination with) the traditional
@@ -110,7 +117,7 @@ import org.springframework.util.ReflectionUtils;
  * @see #onStartup(Set, ServletContext)
  * @see WebApplicationInitializer
  */
-@HandlesTypes(WebApplicationInitializer.class)
+@HandlesTypes(WebApplicationInitializer.class) // 将实现类注入到onStartUp方法中，Set<Class<?>> webAppInitializerClasses
 public class SpringServletContainerInitializer implements ServletContainerInitializer {
 
 	/**

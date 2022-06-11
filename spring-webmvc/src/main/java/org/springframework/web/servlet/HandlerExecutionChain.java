@@ -42,6 +42,9 @@ public class HandlerExecutionChain {
 
 	private static final Log logger = LogFactory.getLog(HandlerExecutionChain.class);
 
+	/**
+	 * Handler对象
+	 */
 	private final Object handler;
 
 	private final List<HandlerInterceptor> interceptorList = new ArrayList<>();

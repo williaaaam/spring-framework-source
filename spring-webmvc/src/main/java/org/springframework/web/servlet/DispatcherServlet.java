@@ -498,20 +498,22 @@ public class DispatcherServlet extends FrameworkServlet {
 		// 如果上传多个文件，还可以调用getFileMap()方法得到 Map< FileName, File> 这样的结构。
 		// MultipartResolver的作用就是封装普通的请求，使其拥有文件上传的功能。
 		initMultipartResolver(context);
-		// 2. 用于从请求中解析出 Locale，是i18n的基础。
+		// 2. 用于从请求中解析出 Locale，是i18n的基础。国际化
 		initLocaleResolver(context);
-		// 3. 用来解析样式、图片及它们所形成的显示效果的集合
+		// 3. 用来解析样式、图片及它们所形成的显示效果的集合，主题
 		initThemeResolver(context);
-		// 4. 保存request和Handler的映射关系
+		// 4. 保存request和Handler的映射关系，初始化映射器，每个请求都需要相应的Handler, handlerMapping可用来查找handler
 		initHandlerMappings(context);
 		// 5. 动态参数适配器，让固定的Servlet处理方法调用Handler来进行处理
-		// 因为Spring MVC中Handler可以是任意形式的，只要能够处理请求便可。但是把请求交给Servlet的时候，由于Servlet的方法结构都是doService(HttpServletRequest req, HttpServletResponse resp)形式的，要让固定的Servlet处理方法调用Handler来进行处理，这一步工作便是HandlerAdapter要做的事。
+		// 因为Spring MVC中Handler可以是任意形式的，只要能够处理请求便可。
+		// 但是把请求交给Servlet的时候，由于Servlet的方法结构都是doService(HttpServletRequest req, HttpServletResponse resp)形式的，
+		// 要让固定的Servlet处理方法调用Handler来进行处理，这一步工作便是HandlerAdapter要做的事。
 		// 【来源：https://python.iitter.com/other/291266.html，转载请注明】
 		initHandlerAdapters(context);
 		// 6. 用来处理Handler产生的异常情况的组件
 		// HandlerExceptionResolver只用于解析对请求做处理阶段产生的异常，渲染阶段的异常不归它管
 		initHandlerExceptionResolvers(context);
-		// 7. 请求中获取ViewName
+		// 7. 请求中获取ViewName，请求URL到具体视图的转换器,提供request->view的实现
 		initRequestToViewNameTranslator(context);
 		// 8. 主要作用是将String类型的视图名和Locale解析为View类型的视图
 		// ViewResolver组件的resolveViewName()方法需要两个参数，一个是视图名，另一个就是Locale。参数Locale是从哪来的呢？这就是LocaleResolver组件要做的事。LocaleResolver用于从请求中解析出 Locale，比如在中国Locale当然就是zh-CN，用来表示一个区域。这个组件也是i18n的基础。
@@ -1052,7 +1054,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				multipartRequestParsed = (processedRequest != request);
 
 				// Determine handler for the current request.
-				// 获取Controller
+				// 获取Controller,mappedHandler包装了handler和拦截器
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);
@@ -1060,7 +1062,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Determine handler adapter for the current request.
-				// 适配调用方法的调用方式,因为Controller定义的方式不止一种,两种类型三种实现：implements HttprequestHandler, Controller或者注解@Controller
+				// 适配调用方法的调用方式,因为Controller定义的方式不止一种,两种类型三种实现：implements HttpRequestHandler, Controller或者注解@Controller, extends HttpServletBean
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
 				// Process last-modified header, if supported by the handler.

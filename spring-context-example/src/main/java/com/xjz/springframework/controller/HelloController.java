@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
  * @description
  * @date 2022/1/6
  */
-@Component
+@Component("/controller/controller")
 public class HelloController implements Controller {
 
 	@Override

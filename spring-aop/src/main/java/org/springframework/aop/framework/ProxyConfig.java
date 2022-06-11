@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
 
 /**
  * 所有AOP代理工厂的父类，它包含了创建一个AOP代理所需要的基础的通用的一些配置信息
+ * <p>
  * Convenience superclass for configuration used in creating proxies,
  * to ensure that all proxy creators have consistent properties.
  *
@@ -36,7 +37,7 @@ public class ProxyConfig implements Serializable {
 
 
 	/**
-	 * 默认jdk代理
+	 * 默认jdk代理；true表示使用CGLIB代理
 	 */
 	private boolean proxyTargetClass = false;
 
@@ -64,6 +65,7 @@ public class ProxyConfig implements Serializable {
 
 
 	/**
+	 * 对应proxy-target-class配置属性，默认值false，表示使用jdk代理，true表示使用CGLIB代理
 	 * Set whether to proxy the target class directly, instead of just proxying
 	 * specific interfaces. Default is "false".
 	 * <p>Set this to "true" to force proxying for the TargetSource's exposed
@@ -80,6 +82,7 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
+	 * 是否直接代理目标类和接口
 	 * Return whether to proxy the target class directly as well as any interfaces.
 	 */
 	public boolean isProxyTargetClass() {

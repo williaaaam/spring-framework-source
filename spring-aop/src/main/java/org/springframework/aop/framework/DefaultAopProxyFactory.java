@@ -23,7 +23,8 @@ import org.springframework.aop.SpringProxy;
 import org.springframework.core.NativeDetector;
 
 /**
- * Spring中AopProxyFactory唯一实现类，用来创建cglib代理或者jdk代理
+ * Spring中AopProxyFactory唯一实现类，用来创建cglib代理或者jdk代理；
+ * 默认工厂类，用来创建AopProxy
  * Default {@link AopProxyFactory} implementation, creating either a CGLIB proxy
  * or a JDK dynamic proxy.
  *
@@ -57,6 +58,9 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 		// 在前面分析参数的时候已经说过了
 		// 默认情况下Optimize都为false,也不建议设置为true,因为会进行一些侵入性的优化
 		// 除非你对cglib的优化非常了解，否则不建议开启
+
+		// 策略模式的典型应用场景，一般是通过环境变量、状态值、计算结果等动态地决定使用哪个策略,
+		// 动态选择哪种策略的判断条件
 		if (!NativeDetector.inNativeImage() &&
 				(config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config))) {
 			Class<?> targetClass = config.getTargetClass();
@@ -78,7 +82,7 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 	}
 
 	/**
-	 * 除了SprinProxy外，判断是否有用户提供的接口
+	 * 除了SpringProxy外，判断是否有用户提供的接口
 	 * Determine whether the supplied {@link AdvisedSupport} has only the
 	 * {@link org.springframework.aop.SpringProxy} interface specified
 	 * (or no proxy interfaces specified at all).

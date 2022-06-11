@@ -142,6 +142,7 @@ public class PersistenceExceptionTranslationInterceptor
 				throw ex;
 			}
 			else {
+				// 将原始数据库访问异常包装成Spring自己的unchecked DataAccessException,方便问题的排查
 				PersistenceExceptionTranslator translator = this.persistenceExceptionTranslator;
 				if (translator == null) {
 					Assert.state(this.beanFactory != null,

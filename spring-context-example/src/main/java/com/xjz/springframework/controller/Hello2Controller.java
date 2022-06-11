@@ -15,12 +15,14 @@ import java.io.IOException;
  * @description
  * @date 2022/1/6
  */
-@Component
+@Component("/controller/httpRequestHandler")
 public class Hello2Controller implements HttpRequestHandler {
 
 	@Override
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.getRequestDispatcher("").forward(request, response);
+//		request.getRequestDispatcher("").forward(request, response);
+		response.getWriter().write("implements HttpRequestHandler");
+
 	}
 
 }

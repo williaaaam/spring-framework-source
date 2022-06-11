@@ -107,6 +107,7 @@ public abstract class AbstractApplicationEventMulticaster
 			// in order to avoid double invocations of the same listener.
 			Object singletonTarget = AopProxyUtils.getSingletonTarget(listener);
 			if (singletonTarget instanceof ApplicationListener) {
+				// 避免重复调用同一个监听器
 				this.defaultRetriever.applicationListeners.remove(singletonTarget);
 			}
 			this.defaultRetriever.applicationListeners.add(listener);
@@ -481,10 +482,11 @@ public abstract class AbstractApplicationEventMulticaster
 
 
 	/**
+	 * 封装监听器
 	 * Helper class that encapsulates a general set of target listeners.
 	 */
 	private class DefaultListenerRetriever {
-
+		// 维护一个List，用来管理所有的订阅者，当发布者发布消息时，遍历对应的订阅者列表，执行各自的回调handler
 		public final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 
 		public final Set<String> applicationListenerBeans = new LinkedHashSet<>();

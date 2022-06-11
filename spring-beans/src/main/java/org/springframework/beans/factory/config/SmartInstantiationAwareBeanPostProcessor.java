@@ -72,6 +72,7 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	/**
 	 * 获取提前暴露的对象，用于解决循环依赖
 	 * 主要为了解决循环依赖，Spring内部使用这个方法主要是为了让早期曝光的对象成为一个“合格”的对象
+	 *
 	 * Obtain a reference for early access to the specified bean,
 	 * typically for the purpose of resolving a circular reference.
 	 * <p>This callback gives post-processors a chance to expose a wrapper

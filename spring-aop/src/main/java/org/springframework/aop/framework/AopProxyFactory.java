@@ -17,6 +17,7 @@
 package org.springframework.aop.framework;
 
 /**
+ * 策略模式，策略的创建一般工厂方法来实现
  * Interface to be implemented by factories that are able to create
  * AOP proxies based on {@link AdvisedSupport} configuration objects.
  *

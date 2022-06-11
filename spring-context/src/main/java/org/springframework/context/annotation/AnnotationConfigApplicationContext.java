@@ -26,7 +26,12 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.metrics.StartupStep;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import javax.annotation.ManagedBean;
 
 /**
  * Standalone application context, accepting <em>component classes</em> as input &mdash;
@@ -70,6 +75,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		this.reader = new AnnotatedBeanDefinitionReader(this);
 		createAnnotatedBeanDefReader.end();
 		// 构造Scanner对象
+		// 注册注解过滤器的过程，注册了指定的注解过滤器，容器在进行包扫描的时候才会去解析指定的注解，在这里是添加了一个@Component注解，同时也会隐式地注册相关的注解过滤器包括@Repository、@Service、@Controller、@ManagedBean、@Name等等
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -92,6 +98,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
 		// 执行AnnotationConfigApplicationContext空构造器
 		this();
+		// 上面的步骤可以认为是整个Spring容器已经初始化完成了，总结一下就是创建了一个容器，容器中包含注册表、bean工厂、环境、注册了重要的注解后置处理器、注册了基本的注解过滤器，但是这个容器还是不完整的，因为现在对于容器来说里面是没有bean的
 		// 注册配置类
 		register(componentClasses);
 		// 刷新容器

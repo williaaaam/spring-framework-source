@@ -154,6 +154,7 @@ public interface HandlerMapping {
 	}
 
 	/**
+	 * 根据请求找到Handler以及拦截器
 	 * Return a handler and any interceptors for this request. The choice may be made
 	 * on request URL, session state, or any factor the implementing class chooses.
 	 * <p>The returned HandlerExecutionChain contains a handler Object, rather than

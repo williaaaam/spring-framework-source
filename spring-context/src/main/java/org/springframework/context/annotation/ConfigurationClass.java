@@ -209,6 +209,10 @@ final class ConfigurationClass {
 		return this.importedResources;
 	}
 
+	/**
+	 * 因为CGLIB的限制，配置类不能是final的，除非proxyBeanMethods=false
+	 * @param problemReporter
+	 */
 	void validate(ProblemReporter problemReporter) {
 		/**
 		 * @Configuration proxyBeanMethods=true,
